@@ -1819,14 +1819,14 @@ function ConversationMarquee({ isMobile }) {
 
   return (
     <div style={{ position:"relative", height: isMobile ? "640px" : "1040px", overflow:"hidden", background:"#060606" }}>
-      <div style={{ position:"absolute", top:"50%", left:"50%", width:"1900px", height:"1500px", marginLeft:"-680px", marginTop:"-950px", transform:`scale(${scale})` }}>
+      <div style={{ position:"absolute", top:"50%", left:"50%", width:"1900px", height:"1500px", marginLeft:"-680px", marginTop:"-820px", transform:`scale(${scale})` }}>
         <div style={{ transform:"rotateX(55deg) rotateY(0deg) rotateZ(-45deg)", transformStyle:"preserve-3d", width:"100%", height:"100%", display:"grid", gridTemplateColumns:"repeat(5, 1fr)", gap:"32px" }}>
             {columns.map((col, colIndex) => (
               <motion.div
                 key={colIndex}
-                initial={{ y: colIndex % 2 === 0 ? -amplitude : amplitude }}
-                animate={{ y: colIndex % 2 === 0 ? amplitude : -amplitude }}
-                transition={{ duration: colIndex % 2 === 0 ? 12 : 17, repeat: Infinity, repeatType:"reverse", ease:"easeInOut" }}
+                initial={{ y: 0 }}
+                animate={{ y: [0, amplitude, -amplitude, 0] }}
+                transition={{ duration: 12 + colIndex * 2, repeat: Infinity, ease:"easeInOut" }}
                 style={{ display:"flex", flexDirection:"column", gap:"32px" }}
               >
                 {col.map((card, i) => (
