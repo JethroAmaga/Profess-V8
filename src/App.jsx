@@ -950,7 +950,7 @@ function buildSVG(charOrKey, mood, isTalking, scene = "role") {
       // ── Executive / conference table ──────────────────────────────────
       case "ceo": case "executive": case "negotiator": case "diplomat":
       case "acquirer": case "board_member": case "investor":
-      case "partner": case "shareholder":
+      case "partner": case "shareholder": case "colleague":
         backProps = `
           <rect x="15" y="90" width="130" height="16" rx="6" fill="#1A1614"/>
           <rect x="15" y="106" width="7" height="82" fill="#1A1614"/>
@@ -973,7 +973,7 @@ function buildSVG(charOrKey, mood, isTalking, scene = "role") {
       case "friend_female": case "friend_male": case "best_friend": case "crush":
       case "date": case "romantic_interest": case "ex_partner": case "classmate":
       case "teman_ospek": case "new_acquaintance": case "neighbor": case "sibling":
-      case "blind_date": case "colleague": case "stranger":
+      case "blind_date": case "stranger":
         if (scene === "livingroom") {
         backProps = `
           <rect x="8" y="108" width="144" height="14" rx="6" fill="#241A14" stroke="#2E2018" stroke-width="1.5"/>
@@ -1819,7 +1819,7 @@ function ConversationMarquee({ isMobile }) {
 
   return (
     <div style={{ position:"relative", height: isMobile ? "640px" : "1040px", overflow:"hidden", background:"#060606" }}>
-      <div style={{ position:"absolute", top:"50%", left:"50%", width:"1900px", height:"1500px", marginLeft:"-680px", marginTop:"-820px", transform:`scale(${scale})` }}>
+      <div style={{ position:"absolute", top:"50%", left:"50%", width:"1900px", height:"1500px", marginLeft:"-980px", marginTop:"-600px", transform:`scale(${scale})` }}>
         <div style={{ transform:"rotateX(55deg) rotateY(0deg) rotateZ(-45deg)", transformStyle:"preserve-3d", width:"100%", height:"100%", display:"grid", gridTemplateColumns:"repeat(5, 1fr)", gap:"32px" }}>
             {columns.map((col, colIndex) => (
               <motion.div
@@ -3208,10 +3208,158 @@ export default function Profess() {
                   <circle cx="0.5" cy="0.5" r="0.22" fill="#26262E"/>
                 </pattern>
               </defs>
+              {/* Cabinet/lemari — absolute backmost layer of the scene: drawn first,
+                  directly after defs, in front of nothing but the background/dot effect
+                  behind this component. Scaled large, legs grounded at the floor line. */}
+              <g transform="translate(24,18.3) scale(0.12)">
+                <rect x="40" y="180" width="280" height="260" rx="4" fill="#1C140C" stroke="#2A2018" strokeWidth="3"/>
+                <rect x="30" y="168" width="300" height="18" rx="2" fill="#241A10" stroke="#332518" strokeWidth="2"/>
+                <rect x="52" y="436" width="14" height="28" fill="#140E08"/>
+                <rect x="294" y="436" width="14" height="28" fill="#140E08"/>
+                <rect x="56" y="196" width="120" height="220" rx="3" fill="#241A10" stroke="#3A2C1C" strokeWidth="2"/>
+                <path d="M116 230 L132 250 L116 270 L100 250 Z" fill="none" stroke="#4A3520" strokeWidth="2"/>
+                <circle cx="166" cy="306" r="4" fill="#C8A458"/>
+                <rect x="184" y="196" width="120" height="220" rx="3" fill="#1E2226" stroke="#3A2C1C" strokeWidth="2"/>
+                <rect x="192" y="204" width="104" height="204" rx="2" fill="#34474A" opacity="0.38"/>
+                <rect x="192" y="204" width="104" height="204" rx="2" fill="none" stroke="#C8A458" strokeWidth="1.4" opacity="0.7"/>
+                <line x1="192" y1="280" x2="296" y2="280" stroke="#C8A458" strokeWidth="2" opacity="0.6"/>
+                <line x1="192" y1="350" x2="296" y2="350" stroke="#C8A458" strokeWidth="2" opacity="0.6"/>
+                <g opacity="0.96">
+                  <ellipse cx="216" cy="252" rx="20" ry="20" fill="#EDE3D0" stroke="#C8A458" strokeWidth="1.6"/>
+                  <ellipse cx="216" cy="252" rx="12" ry="12" fill="none" stroke="#C8A458" strokeWidth="1.2" opacity="0.7"/>
+                  <ellipse cx="246" cy="256" rx="18" ry="18" fill="#F5ECDC" stroke="#C8A458" strokeWidth="1.6"/>
+                  <ellipse cx="246" cy="256" rx="11" ry="11" fill="none" stroke="#C8A458" strokeWidth="1.2" opacity="0.7"/>
+                  <ellipse cx="274" cy="252" rx="20" ry="20" fill="#EDE3D0" stroke="#C8A458" strokeWidth="1.6"/>
+                  <ellipse cx="274" cy="252" rx="12" ry="12" fill="none" stroke="#C8A458" strokeWidth="1.2" opacity="0.7"/>
+                </g>
+                <ellipse cx="244" cy="322" rx="22" ry="9" fill="#5E4A30"/>
+                <ellipse cx="244" cy="318" rx="22" ry="9" fill="#7A6242"/>
+                <g>
+                  <ellipse cx="214" cy="392" rx="10" ry="5" fill="#EDE3D0"/>
+                  <rect x="206" y="386" width="16" height="8" rx="3" fill="#F5ECDC"/>
+                  <ellipse cx="244" cy="392" rx="10" ry="5" fill="#EDE3D0"/>
+                  <rect x="236" y="386" width="16" height="8" rx="3" fill="#F5ECDC"/>
+                  <ellipse cx="274" cy="392" rx="10" ry="5" fill="#EDE3D0"/>
+                  <rect x="266" y="386" width="16" height="8" rx="3" fill="#F5ECDC"/>
+                </g>
+                <path d="M168 168 C160 168 156 156 160 144 C163 134 161 126 168 120 C175 126 173 134 176 144 C180 156 176 168 168 168 Z" fill="#7A2E22" stroke="#3A1410" strokeWidth="2"/>
+                <rect x="160" y="160" width="16" height="8" rx="2" fill="#5E2018"/>
+                <path d="M168 122 C168 100 158 86 150 70" stroke="#3B5C3A" strokeWidth="3" fill="none"/>
+                <path d="M168 122 C168 96 176 80 186 64" stroke="#3B5C3A" strokeWidth="3" fill="none"/>
+                <path d="M168 122 C168 92 168 74 168 56" stroke="#3B5C3A" strokeWidth="3" fill="none"/>
+                <path d="M160 96 q-10 4 -16 -4" stroke="#3B5C3A" strokeWidth="2.4" fill="none"/>
+                <path d="M178 90 q10 4 16 -4" stroke="#3B5C3A" strokeWidth="2.4" fill="none"/>
+                <g transform="translate(150,66)">
+                  <circle r="9.5" fill="#7A1E1E"/>
+                  <path d="M0 -7 C5 -7 7 -3 6 1 C5 5 0 6 -3 4 C-6 2 -7 -3 -3 -6 C-2 -7 -1 -7 0 -7 Z" fill="#A8302A"/>
+                  <path d="M0 -4 C3 -4 4.5 -1.5 4 1 C3.4 3 0 3.6 -1.6 2.4 C-3.4 1 -3.8 -1.6 -1.6 -3.4 C-1 -3.8 -0.5 -4 0 -4 Z" fill="#C44438"/>
+                  <path d="M0 -1.6 C1.6 -1.6 2.4 -0.4 2 0.8 C1.7 1.7 0 2 -0.8 1.4 C-1.8 0.6 -1.8 -0.8 -0.6 -1.4 Z" fill="#E0584A"/>
+                </g>
+                <g transform="translate(186,60)">
+                  <circle r="9.5" fill="#6E1A22"/>
+                  <path d="M0 -7 C5 -7 7 -3 6 1 C5 5 0 6 -3 4 C-6 2 -7 -3 -3 -6 C-2 -7 -1 -7 0 -7 Z" fill="#9E2A36"/>
+                  <path d="M0 -4 C3 -4 4.5 -1.5 4 1 C3.4 3 0 3.6 -1.6 2.4 C-3.4 1 -3.8 -1.6 -1.6 -3.4 C-1 -3.8 -0.5 -4 0 -4 Z" fill="#BD3A46"/>
+                  <path d="M0 -1.6 C1.6 -1.6 2.4 -0.4 2 0.8 C1.7 1.7 0 2 -0.8 1.4 C-1.8 0.6 -1.8 -0.8 -0.6 -1.4 Z" fill="#DA5A60"/>
+                </g>
+                <g transform="translate(168,50)">
+                  <circle r="10.5" fill="#5E1018"/>
+                  <path d="M0 -7.6 C5.6 -7.6 7.6 -3.2 6.6 1.2 C5.6 5.4 0 6.6 -3.4 4.4 C-6.6 2.2 -7.6 -3.2 -3.4 -6.6 C-2.2 -7.6 -1 -7.6 0 -7.6 Z" fill="#8C1A22"/>
+                  <path d="M0 -4.4 C3.4 -4.4 5 -1.6 4.4 1 C3.8 3.4 0 4 -1.8 2.6 C-3.8 1 -4.2 -1.8 -1.8 -3.8 C-1 -4.2 -0.5 -4.4 0 -4.4 Z" fill="#AC2A30"/>
+                  <path d="M0 -1.8 C1.8 -1.8 2.6 -0.4 2.2 0.9 C1.9 1.9 0 2.2 -0.9 1.5 C-2 0.7 -2 -0.9 -0.7 -1.5 Z" fill="#D04848"/>
+                </g>
+                <path d="M150 66 q-12 -2 -16 -10 q10 0 16 10 Z" fill="#3B5C3A"/>
+                <path d="M186 60 q12 -2 16 -8 q-10 0 -16 8 Z" fill="#3B5C3A"/>
+                <rect x="80" y="138" width="44" height="32" rx="2" fill="#2A1E12" stroke="#C8A458" strokeWidth="2"/>
+                <rect x="86" y="144" width="32" height="20" fill="#4A3D2C"/>
+              </g>
+              {/* Wall photos — hung on the wall around the top of the cabinet, offset
+                  to its sides, lowered closer to the cabinet, each with a small painted scene */}
+              <g>
+                <g transform="rotate(-4 9 16)">
+                  <rect x="5.1" y="11.1" width="7.8" height="9.8" rx="0.3" fill="#2A1E12" stroke="#C8A458" strokeWidth="0.25"/>
+                  <rect x="5.5" y="11.5" width="7" height="9" fill="#EDE3D0"/>
+                  {/* flower */}
+                  <rect x="6" y="12" width="6" height="8" fill="#C9DCE6"/>
+                  <rect x="6" y="18" width="6" height="2" fill="#7A8F5A"/>
+                  <line x1="9" y1="18" x2="9" y2="14" stroke="#4A7A3A" strokeWidth="0.3"/>
+                  <path d="M9 14 q-1 -0.6 -1.6 0.2" stroke="#4A7A3A" strokeWidth="0.25" fill="none"/>
+                  <circle cx="9" cy="13.4" r="1" fill="#E0584A"/>
+                  <circle cx="8" cy="14" r="0.7" fill="#D04848"/>
+                  <circle cx="10" cy="14" r="0.7" fill="#D04848"/>
+                  <circle cx="9" cy="12.6" r="0.7" fill="#E0584A"/>
+                </g>
+                <g transform="rotate(3 21 14)">
+                  <rect x="16.6" y="8.6" width="8.8" height="10.8" rx="0.3" fill="#2A1E12" stroke="#C8A458" strokeWidth="0.25"/>
+                  <rect x="17" y="9" width="8" height="10" fill="#EDE3D0"/>
+                  {/* eiffel tower */}
+                  <rect x="17.5" y="9.5" width="7" height="5.4" fill="#E8B070"/>
+                  <rect x="17.5" y="14.9" width="7" height="3.6" fill="#3A2A20"/>
+                  <path d="M19.7 18.5 L20.7 12 L21 10.2 L21.3 12 L22.3 18.5" fill="none" stroke="#2A1E14" strokeWidth="0.3"/>
+                  <line x1="19.9" y1="15" x2="22.1" y2="15" stroke="#2A1E14" strokeWidth="0.22"/>
+                  <line x1="20.2" y1="13" x2="21.8" y2="13" stroke="#2A1E14" strokeWidth="0.22"/>
+                  <line x1="21" y1="10.2" x2="21" y2="9.6" stroke="#2A1E14" strokeWidth="0.22"/>
+                </g>
+                <g transform="rotate(-3 60 14)">
+                  <rect x="56.1" y="9.1" width="7.8" height="9.8" rx="0.3" fill="#2A1E12" stroke="#C8A458" strokeWidth="0.25"/>
+                  <rect x="56.5" y="9.5" width="7" height="9" fill="#EDE3D0"/>
+                  {/* sakura tree */}
+                  <rect x="57" y="10" width="6" height="5.5" fill="#F5D9DE"/>
+                  <rect x="57" y="15.5" width="6" height="2.5" fill="#6E8F5A"/>
+                  <line x1="60" y1="17.8" x2="60" y2="13.5" stroke="#5A3A20" strokeWidth="0.5"/>
+                  <circle cx="60" cy="12.5" r="2" fill="#F2A8C0"/>
+                  <circle cx="58.7" cy="13.3" r="1.3" fill="#EE9AB5"/>
+                  <circle cx="61.3" cy="13.3" r="1.3" fill="#EE9AB5"/>
+                </g>
+                <g transform="rotate(4 72 17)">
+                  <rect x="68.6" y="12.6" width="6.8" height="8.8" rx="0.3" fill="#2A1E12" stroke="#C8A458" strokeWidth="0.25"/>
+                  <rect x="69" y="13" width="6" height="8" fill="#EDE3D0"/>
+                  {/* mountains */}
+                  <rect x="69.5" y="13.5" width="5" height="4" fill="#BFD8E8"/>
+                  <rect x="69.5" y="17.5" width="5" height="3" fill="#6E93A8"/>
+                  <path d="M70 17.5 L71.3 14 L72.2 16 L73 13.2 L74.5 17.5 Z" fill="#5A6E7A"/>
+                  <path d="M71.3 14 L71.6 14.7 L71 14.7 Z" fill="#F5F5F0"/>
+                  <path d="M73 13.2 L73.3 13.9 L72.7 13.9 Z" fill="#F5F5F0"/>
+                </g>
+                <g transform="rotate(-2 83 19)">
+                  <rect x="79.6" y="15.1" width="6.8" height="7.8" rx="0.3" fill="#2A1E12" stroke="#C8A458" strokeWidth="0.25"/>
+                  <rect x="80" y="15.5" width="6" height="7" fill="#EDE3D0"/>
+                  {/* ocean sunset */}
+                  <rect x="80.5" y="16" width="5" height="3.5" fill="#E8A878"/>
+                  <rect x="80.5" y="19.5" width="5" height="2.5" fill="#4A6A78"/>
+                  <circle cx="83" cy="18.5" r="1.1" fill="#F0C040"/>
+                  <line x1="80.5" y1="19.5" x2="85.5" y2="19.5" stroke="#3A4A50" strokeWidth="0.2"/>
+                </g>
+              </g>
               {/* Floor */}
               <line x1="0" y1="75" x2="100" y2="75" stroke="#2A2010" strokeWidth="0.3" opacity="0.7"/>
-              {/* Rug */}
-              <ellipse cx="50" cy="75.5" rx="35" ry="4" fill="#2A1A0A" opacity="0.4"/>
+              {/* Rug — sits beneath the coffee table, back layer; centered on the green
+                  coffee table itself (table center x=50, span 38-62), not on table+radio combined */}
+              <g>
+                <ellipse cx="50" cy="87" rx="32" ry="10" fill="#000000" opacity="0.3"/>
+                <ellipse cx="50" cy="85" rx="32" ry="10" fill="#5E2018" stroke="#3A1410" strokeWidth="0.4"/>
+                <ellipse cx="50" cy="85" rx="29" ry="8.6" fill="#7A2E22"/>
+                <ellipse cx="50" cy="85" rx="29" ry="8.6" fill="none" stroke="#C8A458" strokeWidth="0.55"/>
+                <ellipse cx="50" cy="85" rx="25.5" ry="7.4" fill="none" stroke="#C8A458" strokeWidth="0.2" opacity="0.7"/>
+                <g stroke="#C8A458" strokeWidth="0.18" fill="none" opacity="0.85">
+                  <path d="M73 85 L73.8 85.8 L73 86.6 L72.2 85.8 Z"/>
+                  <path d="M69.92 88.15 L70.72 88.95 L69.92 89.75 L69.12 88.95 Z"/>
+                  <path d="M61.5 90.46 L62.3 91.26 L61.5 92.06 L60.7 91.26 Z"/>
+                  <path d="M50 91.3 L50.8 92.1 L50 92.9 L49.2 92.1 Z"/>
+                  <path d="M38.5 90.46 L39.3 91.26 L38.5 92.06 L37.7 91.26 Z"/>
+                  <path d="M30.08 88.15 L30.88 88.95 L30.08 89.75 L29.28 88.95 Z"/>
+                  <path d="M27 85 L27.8 85.8 L27 86.6 L26.2 85.8 Z"/>
+                  <path d="M30.08 81.85 L30.88 82.65 L30.08 83.45 L29.28 82.65 Z"/>
+                  <path d="M38.5 79.54 L39.3 80.34 L38.5 81.14 L37.7 80.34 Z"/>
+                  <path d="M50 78.7 L50.8 79.5 L50 80.3 L49.2 79.5 Z"/>
+                  <path d="M61.5 79.54 L62.3 80.34 L61.5 81.14 L60.7 80.34 Z"/>
+                  <path d="M69.92 81.85 L70.72 82.65 L69.92 83.45 L69.12 82.65 Z"/>
+                </g>
+                <g transform="translate(50,85)">
+                  <ellipse rx="7" ry="2.3" fill="#5E2018" stroke="#C8A458" strokeWidth="0.3"/>
+                  <ellipse rx="4.3" ry="1.4" fill="none" stroke="#C8A458" strokeWidth="0.2" opacity="0.8"/>
+                  <path d="M0 -1.3 L1.3 0 L0 1.3 L-1.3 0 Z" fill="#C8A458" opacity="0.9"/>
+                </g>
+              </g>
               {/* Left character — full social-role render, with its own sofa/seat props */}
               <foreignObject x="2" y="38" width="36" height="40" overflow="visible" opacity={warmMode ? 0.75 : 0.45}>
                 <div xmlns="http://www.w3.org/1999/xhtml" style={{ width:"100%", height:"100%", perspective:"900px" }}>
@@ -3405,8 +3553,158 @@ export default function Profess() {
                 <circle cx="0.5" cy="0.5" r="0.22" fill="#26262E"/>
               </pattern>
             </defs>
+            {/* Cabinet/lemari — absolute backmost layer of the scene: drawn first,
+                directly after defs, in front of nothing but the background/dot effect
+                behind this component. Scaled large, legs grounded at the floor line. */}
+            <g transform="translate(24,18.3) scale(0.12)">
+              <rect x="40" y="180" width="280" height="260" rx="4" fill="#1C140C" stroke="#2A2018" strokeWidth="3"/>
+              <rect x="30" y="168" width="300" height="18" rx="2" fill="#241A10" stroke="#332518" strokeWidth="2"/>
+              <rect x="52" y="436" width="14" height="28" fill="#140E08"/>
+              <rect x="294" y="436" width="14" height="28" fill="#140E08"/>
+              <rect x="56" y="196" width="120" height="220" rx="3" fill="#241A10" stroke="#3A2C1C" strokeWidth="2"/>
+              <path d="M116 230 L132 250 L116 270 L100 250 Z" fill="none" stroke="#4A3520" strokeWidth="2"/>
+              <circle cx="166" cy="306" r="4" fill="#C8A458"/>
+              <rect x="184" y="196" width="120" height="220" rx="3" fill="#1E2226" stroke="#3A2C1C" strokeWidth="2"/>
+              <rect x="192" y="204" width="104" height="204" rx="2" fill="#34474A" opacity="0.38"/>
+              <rect x="192" y="204" width="104" height="204" rx="2" fill="none" stroke="#C8A458" strokeWidth="1.4" opacity="0.7"/>
+              <line x1="192" y1="280" x2="296" y2="280" stroke="#C8A458" strokeWidth="2" opacity="0.6"/>
+              <line x1="192" y1="350" x2="296" y2="350" stroke="#C8A458" strokeWidth="2" opacity="0.6"/>
+              <g opacity="0.96">
+                <ellipse cx="216" cy="252" rx="20" ry="20" fill="#EDE3D0" stroke="#C8A458" strokeWidth="1.6"/>
+                <ellipse cx="216" cy="252" rx="12" ry="12" fill="none" stroke="#C8A458" strokeWidth="1.2" opacity="0.7"/>
+                <ellipse cx="246" cy="256" rx="18" ry="18" fill="#F5ECDC" stroke="#C8A458" strokeWidth="1.6"/>
+                <ellipse cx="246" cy="256" rx="11" ry="11" fill="none" stroke="#C8A458" strokeWidth="1.2" opacity="0.7"/>
+                <ellipse cx="274" cy="252" rx="20" ry="20" fill="#EDE3D0" stroke="#C8A458" strokeWidth="1.6"/>
+                <ellipse cx="274" cy="252" rx="12" ry="12" fill="none" stroke="#C8A458" strokeWidth="1.2" opacity="0.7"/>
+              </g>
+              <ellipse cx="244" cy="322" rx="22" ry="9" fill="#5E4A30"/>
+              <ellipse cx="244" cy="318" rx="22" ry="9" fill="#7A6242"/>
+              <g>
+                <ellipse cx="214" cy="392" rx="10" ry="5" fill="#EDE3D0"/>
+                <rect x="206" y="386" width="16" height="8" rx="3" fill="#F5ECDC"/>
+                <ellipse cx="244" cy="392" rx="10" ry="5" fill="#EDE3D0"/>
+                <rect x="236" y="386" width="16" height="8" rx="3" fill="#F5ECDC"/>
+                <ellipse cx="274" cy="392" rx="10" ry="5" fill="#EDE3D0"/>
+                <rect x="266" y="386" width="16" height="8" rx="3" fill="#F5ECDC"/>
+              </g>
+              <path d="M168 168 C160 168 156 156 160 144 C163 134 161 126 168 120 C175 126 173 134 176 144 C180 156 176 168 168 168 Z" fill="#7A2E22" stroke="#3A1410" strokeWidth="2"/>
+              <rect x="160" y="160" width="16" height="8" rx="2" fill="#5E2018"/>
+              <path d="M168 122 C168 100 158 86 150 70" stroke="#3B5C3A" strokeWidth="3" fill="none"/>
+              <path d="M168 122 C168 96 176 80 186 64" stroke="#3B5C3A" strokeWidth="3" fill="none"/>
+              <path d="M168 122 C168 92 168 74 168 56" stroke="#3B5C3A" strokeWidth="3" fill="none"/>
+              <path d="M160 96 q-10 4 -16 -4" stroke="#3B5C3A" strokeWidth="2.4" fill="none"/>
+              <path d="M178 90 q10 4 16 -4" stroke="#3B5C3A" strokeWidth="2.4" fill="none"/>
+              <g transform="translate(150,66)">
+                <circle r="9.5" fill="#7A1E1E"/>
+                <path d="M0 -7 C5 -7 7 -3 6 1 C5 5 0 6 -3 4 C-6 2 -7 -3 -3 -6 C-2 -7 -1 -7 0 -7 Z" fill="#A8302A"/>
+                <path d="M0 -4 C3 -4 4.5 -1.5 4 1 C3.4 3 0 3.6 -1.6 2.4 C-3.4 1 -3.8 -1.6 -1.6 -3.4 C-1 -3.8 -0.5 -4 0 -4 Z" fill="#C44438"/>
+                <path d="M0 -1.6 C1.6 -1.6 2.4 -0.4 2 0.8 C1.7 1.7 0 2 -0.8 1.4 C-1.8 0.6 -1.8 -0.8 -0.6 -1.4 Z" fill="#E0584A"/>
+              </g>
+              <g transform="translate(186,60)">
+                <circle r="9.5" fill="#6E1A22"/>
+                <path d="M0 -7 C5 -7 7 -3 6 1 C5 5 0 6 -3 4 C-6 2 -7 -3 -3 -6 C-2 -7 -1 -7 0 -7 Z" fill="#9E2A36"/>
+                <path d="M0 -4 C3 -4 4.5 -1.5 4 1 C3.4 3 0 3.6 -1.6 2.4 C-3.4 1 -3.8 -1.6 -1.6 -3.4 C-1 -3.8 -0.5 -4 0 -4 Z" fill="#BD3A46"/>
+                <path d="M0 -1.6 C1.6 -1.6 2.4 -0.4 2 0.8 C1.7 1.7 0 2 -0.8 1.4 C-1.8 0.6 -1.8 -0.8 -0.6 -1.4 Z" fill="#DA5A60"/>
+              </g>
+              <g transform="translate(168,50)">
+                <circle r="10.5" fill="#5E1018"/>
+                <path d="M0 -7.6 C5.6 -7.6 7.6 -3.2 6.6 1.2 C5.6 5.4 0 6.6 -3.4 4.4 C-6.6 2.2 -7.6 -3.2 -3.4 -6.6 C-2.2 -7.6 -1 -7.6 0 -7.6 Z" fill="#8C1A22"/>
+                <path d="M0 -4.4 C3.4 -4.4 5 -1.6 4.4 1 C3.8 3.4 0 4 -1.8 2.6 C-3.8 1 -4.2 -1.8 -1.8 -3.8 C-1 -4.2 -0.5 -4.4 0 -4.4 Z" fill="#AC2A30"/>
+                <path d="M0 -1.8 C1.8 -1.8 2.6 -0.4 2.2 0.9 C1.9 1.9 0 2.2 -0.9 1.5 C-2 0.7 -2 -0.9 -0.7 -1.5 Z" fill="#D04848"/>
+              </g>
+              <path d="M150 66 q-12 -2 -16 -10 q10 0 16 10 Z" fill="#3B5C3A"/>
+              <path d="M186 60 q12 -2 16 -8 q-10 0 -16 8 Z" fill="#3B5C3A"/>
+              <rect x="80" y="138" width="44" height="32" rx="2" fill="#2A1E12" stroke="#C8A458" strokeWidth="2"/>
+              <rect x="86" y="144" width="32" height="20" fill="#4A3D2C"/>
+            </g>
+            {/* Wall photos — hung on the wall around the top of the cabinet, offset
+                to its sides, lowered closer to the cabinet, each with a small painted scene */}
+            <g>
+              <g transform="rotate(-4 9 13)">
+                <rect x="5.1" y="8.1" width="7.8" height="9.8" rx="0.3" fill="#2A1E12" stroke="#C8A458" strokeWidth="0.25"/>
+                <rect x="5.5" y="8.5" width="7" height="9" fill="#EDE3D0"/>
+                {/* flower */}
+                <rect x="6" y="9" width="6" height="8" fill="#C9DCE6"/>
+                <rect x="6" y="15" width="6" height="2" fill="#7A8F5A"/>
+                <line x1="9" y1="15" x2="9" y2="11" stroke="#4A7A3A" strokeWidth="0.3"/>
+                <path d="M9 11 q-1 -0.6 -1.6 0.2" stroke="#4A7A3A" strokeWidth="0.25" fill="none"/>
+                <circle cx="9" cy="10.4" r="1" fill="#E0584A"/>
+                <circle cx="8" cy="11" r="0.7" fill="#D04848"/>
+                <circle cx="10" cy="11" r="0.7" fill="#D04848"/>
+                <circle cx="9" cy="9.6" r="0.7" fill="#E0584A"/>
+              </g>
+              <g transform="rotate(3 21 11)">
+                <rect x="16.6" y="5.6" width="8.8" height="10.8" rx="0.3" fill="#2A1E12" stroke="#C8A458" strokeWidth="0.25"/>
+                <rect x="17" y="6" width="8" height="10" fill="#EDE3D0"/>
+                {/* eiffel tower */}
+                <rect x="17.5" y="6.5" width="7" height="5.4" fill="#E8B070"/>
+                <rect x="17.5" y="11.9" width="7" height="3.6" fill="#3A2A20"/>
+                <path d="M19.7 15.5 L20.7 9 L21 7.2 L21.3 9 L22.3 15.5" fill="none" stroke="#2A1E14" strokeWidth="0.3"/>
+                <line x1="19.9" y1="12" x2="22.1" y2="12" stroke="#2A1E14" strokeWidth="0.22"/>
+                <line x1="20.2" y1="10" x2="21.8" y2="10" stroke="#2A1E14" strokeWidth="0.22"/>
+                <line x1="21" y1="7.2" x2="21" y2="6.6" stroke="#2A1E14" strokeWidth="0.22"/>
+              </g>
+              <g transform="rotate(-3 60 11)">
+                <rect x="56.1" y="6.1" width="7.8" height="9.8" rx="0.3" fill="#2A1E12" stroke="#C8A458" strokeWidth="0.25"/>
+                <rect x="56.5" y="6.5" width="7" height="9" fill="#EDE3D0"/>
+                {/* sakura tree */}
+                <rect x="57" y="7" width="6" height="5.5" fill="#F5D9DE"/>
+                <rect x="57" y="12.5" width="6" height="2.5" fill="#6E8F5A"/>
+                <line x1="60" y1="14.8" x2="60" y2="10.5" stroke="#5A3A20" strokeWidth="0.5"/>
+                <circle cx="60" cy="9.5" r="2" fill="#F2A8C0"/>
+                <circle cx="58.7" cy="10.3" r="1.3" fill="#EE9AB5"/>
+                <circle cx="61.3" cy="10.3" r="1.3" fill="#EE9AB5"/>
+              </g>
+              <g transform="rotate(4 72 14)">
+                <rect x="68.6" y="9.6" width="6.8" height="8.8" rx="0.3" fill="#2A1E12" stroke="#C8A458" strokeWidth="0.25"/>
+                <rect x="69" y="10" width="6" height="8" fill="#EDE3D0"/>
+                {/* mountains */}
+                <rect x="69.5" y="10.5" width="5" height="4" fill="#BFD8E8"/>
+                <rect x="69.5" y="14.5" width="5" height="3" fill="#6E93A8"/>
+                <path d="M70 14.5 L71.3 11 L72.2 13 L73 10.2 L74.5 14.5 Z" fill="#5A6E7A"/>
+                <path d="M71.3 11 L71.6 11.7 L71 11.7 Z" fill="#F5F5F0"/>
+                <path d="M73 10.2 L73.3 10.9 L72.7 10.9 Z" fill="#F5F5F0"/>
+              </g>
+              <g transform="rotate(-2 83 16)">
+                <rect x="79.6" y="12.1" width="6.8" height="7.8" rx="0.3" fill="#2A1E12" stroke="#C8A458" strokeWidth="0.25"/>
+                <rect x="80" y="12.5" width="6" height="7" fill="#EDE3D0"/>
+                {/* ocean sunset */}
+                <rect x="80.5" y="13" width="5" height="3.5" fill="#E8A878"/>
+                <rect x="80.5" y="16.5" width="5" height="2.5" fill="#4A6A78"/>
+                <circle cx="83" cy="15.5" r="1.1" fill="#F0C040"/>
+                <line x1="80.5" y1="16.5" x2="85.5" y2="16.5" stroke="#3A4A50" strokeWidth="0.2"/>
+              </g>
+            </g>
+            {/* Floor */}
             <line x1="0" y1="75" x2="100" y2="75" stroke="#2A2010" strokeWidth="0.3" opacity="0.7"/>
-            <ellipse cx="50" cy="75.5" rx="35" ry="4" fill="#2A1A0A" opacity="0.4"/>
+            {/* Rug — sits beneath the coffee table, back layer; centered on the green
+                coffee table itself (table center x=50, span 38-62), not on table+radio combined */}
+            <g>
+              <ellipse cx="50" cy="87" rx="32" ry="10" fill="#000000" opacity="0.3"/>
+              <ellipse cx="50" cy="85" rx="32" ry="10" fill="#5E2018" stroke="#3A1410" strokeWidth="0.4"/>
+              <ellipse cx="50" cy="85" rx="29" ry="8.6" fill="#7A2E22"/>
+              <ellipse cx="50" cy="85" rx="29" ry="8.6" fill="none" stroke="#C8A458" strokeWidth="0.55"/>
+              <ellipse cx="50" cy="85" rx="25.5" ry="7.4" fill="none" stroke="#C8A458" strokeWidth="0.2" opacity="0.7"/>
+              <g stroke="#C8A458" strokeWidth="0.18" fill="none" opacity="0.85">
+                <path d="M73 85 L73.8 85.8 L73 86.6 L72.2 85.8 Z"/>
+                <path d="M69.92 88.15 L70.72 88.95 L69.92 89.75 L69.12 88.95 Z"/>
+                <path d="M61.5 90.46 L62.3 91.26 L61.5 92.06 L60.7 91.26 Z"/>
+                <path d="M50 91.3 L50.8 92.1 L50 92.9 L49.2 92.1 Z"/>
+                <path d="M38.5 90.46 L39.3 91.26 L38.5 92.06 L37.7 91.26 Z"/>
+                <path d="M30.08 88.15 L30.88 88.95 L30.08 89.75 L29.28 88.95 Z"/>
+                <path d="M27 85 L27.8 85.8 L27 86.6 L26.2 85.8 Z"/>
+                <path d="M30.08 81.85 L30.88 82.65 L30.08 83.45 L29.28 82.65 Z"/>
+                <path d="M38.5 79.54 L39.3 80.34 L38.5 81.14 L37.7 80.34 Z"/>
+                <path d="M50 78.7 L50.8 79.5 L50 80.3 L49.2 79.5 Z"/>
+                <path d="M61.5 79.54 L62.3 80.34 L61.5 81.14 L60.7 80.34 Z"/>
+                <path d="M69.92 81.85 L70.72 82.65 L69.92 83.45 L69.12 82.65 Z"/>
+              </g>
+              <g transform="translate(50,85)">
+                <ellipse rx="7" ry="2.3" fill="#5E2018" stroke="#C8A458" strokeWidth="0.3"/>
+                <ellipse rx="4.3" ry="1.4" fill="none" stroke="#C8A458" strokeWidth="0.2" opacity="0.8"/>
+                <path d="M0 -1.3 L1.3 0 L0 1.3 L-1.3 0 Z" fill="#C8A458" opacity="0.9"/>
+              </g>
+            </g>
             <foreignObject x="-4" y="32" width="48" height="54" overflow="visible" opacity={1}>
               <div xmlns="http://www.w3.org/1999/xhtml" style={{ width:"100%", height:"100%", perspective:"900px" }}>
                 <div data-gyro-tilt="1" style={{ width:"100%", height:"100%", transformStyle:"preserve-3d", transition:"transform .2s ease-linear" }} onMouseMove={bodyTiltMove("roomMale")} onTouchMove={bodyTiltMove("roomMale")} onMouseLeave={bodyTiltLeave("roomMale")} onTouchEnd={bodyTiltLeave("roomMale")}>
