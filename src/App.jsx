@@ -4,6 +4,23 @@ import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useTexture, Html } from "@react-three/drei";
 
+// Anonymous per-browser session id, sent as a header so the backend can rate-limit
+// per-browser instead of per-IP (avoids unfairly throttling shared-IP users together).
+// Not an account — no personal data, just a random id persisted in localStorage.
+const SESSION_ID_KEY = "profess_session_id";
+function getSessionId() {
+  try {
+    let id = localStorage.getItem(SESSION_ID_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(SESSION_ID_KEY, id);
+    }
+    return id;
+  } catch {
+    return null;
+  }
+}
+
 // ─── System prompts ────────────────────────────────────────────────────────
 const PROMPTS = {
   en: {
@@ -2555,9 +2572,13 @@ export default function Profess() {
     });
 
     const playViaElevenLabs = async (cleanedText, isStage, isInner) => {
+      const sessionId = getSessionId();
       const res = await fetch("/api/tts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(sessionId ? { "X-Profess-Session": sessionId } : {}),
+        },
         body: JSON.stringify({ text: cleanedText, language: lang === "id" ? "id" : "en" }),
       });
       const data = await res.json();
@@ -2705,9 +2726,13 @@ export default function Profess() {
   const callAPI = async (msgs, mode, language, intensityLevel) => {
     const rawPrompt = PROMPTS[language||"en"][mode] || PROMPTS.en.formal;
     const systemPrompt = rawPrompt.replace(/\{\{INTENSITY\}\}/g, intensityLevel || "challenging");
+    const sessionId = getSessionId();
     const res = await fetch("/api/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(sessionId ? { "X-Profess-Session": sessionId } : {}),
+      },
       body: JSON.stringify({
         system: systemPrompt,
         messages: msgs.map(m => ({ role: m.role==="assistant"?"assistant":"user", content: m.content }))
