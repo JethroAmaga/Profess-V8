@@ -34,9 +34,10 @@ export default async function handler(req, res) {
           messages: nvMessages,
           max_tokens: 1000,
           stream: false,
-          // Disable extended chain-of-thought reasoning on DeepSeek-style
+          // Disable extended chain-of-thought reasoning on DeepSeek's
           // "thinking" models — without this, generation can take minutes.
-          chat_template_kwargs: { thinking: false },
+          // GLM doesn't use this param, so only send it for DeepSeek models.
+          ...(model.includes("deepseek") ? { chat_template_kwargs: { thinking: false } } : {}),
         }),
       });
     } finally {
