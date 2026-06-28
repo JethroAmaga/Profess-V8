@@ -1658,8 +1658,8 @@ const FlapCell = ({ target, delay, stepMs, flipDuration, mobileBoard }) => {
     };
   }, [target, delay, stepMs]);
 
-  const show = current === " " ? " " : current;
-  const showPrev = prev === " " ? " " : prev;
+  const show = current === " " ? " " : current;
+  const showPrev = prev === " " ? " " : prev;
   const cellTextStyle = { fontSize: mobileBoard ? "clamp(10px, 4.4vw, 20px)" : "clamp(7px, 1.8vw, 16px)", lineHeight:1, fontFamily:"'Manrope',monospace", fontWeight:700, letterSpacing:"0.03em" };
   const halfBase = { position:"absolute", insetInline:0, overflow:"hidden", background:"#181410", color:"#E9E5DC" };
   const textWrap = { position:"absolute", insetInline:0, display:"flex", alignItems:"center", justifyContent:"center", userSelect:"none", ...cellTextStyle };
@@ -2192,6 +2192,8 @@ export default function Profess() {
   const [isListening, setIsListening] = useState(false);
   const [micError, setMicError] = useState(null);
   const [showPlayer, setShowPlayer] = useState(false);
+  const ttsAudioRef = useRef(null);
+  const ttsFailedRef = useRef(false); // once Chatterbox fails, stop retrying for this session
   const [activePlaylist, setActivePlaylist] = useState(0);
   const [showMusicSuggest, setShowMusicSuggest] = useState(false);
   const [showDesktopMusicHint, setShowDesktopMusicHint] = useState(false);
@@ -2499,14 +2501,7 @@ export default function Profess() {
     if (!queue.length) return;
 
     let idx = 0;
-    const playNext = () => {
-      if (idx >= queue.length) { setIsSpeaking(false); stopTalking(); return; }
-      const seg = queue[idx++];
-      const isStage = seg.type === 'stage';
-      const isInner = seg.type === 'inner';
-      const cleanedText = scrubForSpeech(seg.text);
-      if (!cleanedText) { playNext(); return; }
-
+    const playViaWebSpeech = (cleanedText, isStage, isInner) => {
       const utterance = new SpeechSynthesisUtterance(cleanedText);
       // Stage: coach narrator voice
       // Inner: same voice as character but with isInnerThought modulation
@@ -2537,8 +2532,59 @@ export default function Profess() {
       window.speechSynthesis.speak(utterance);
     };
 
+    const playViaChatterbox = async (cleanedText, isStage, isInner) => {
+      try {
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: cleanedText, language: lang === "id" ? "id" : "en" }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.audio) throw new Error("tts unavailable");
+
+        if (!ttsAudioRef.current) ttsAudioRef.current = new Audio();
+        const audio = ttsAudioRef.current;
+        audio.src = `data:audio/${data.format || "mp3"};base64,${data.audio}`;
+
+        return new Promise((resolve, reject) => {
+          audio.onplay = () => {
+            setIsSpeaking(true);
+            if (!isStage && !isInner) startTalking(); else stopTalking();
+          };
+          audio.ontimeupdate = () => {
+            if (!isStage && !isInner) { setIsTalking(true); setTimeout(() => setIsTalking(false), 160); }
+          };
+          audio.onended = resolve;
+          audio.onerror = () => reject(new Error("playback error"));
+          audio.play().catch(reject);
+        });
+      } catch {
+        return Promise.reject(new Error("chatterbox failed"));
+      }
+    };
+
+    const playNext = () => {
+      if (idx >= queue.length) { setIsSpeaking(false); stopTalking(); return; }
+      const seg = queue[idx++];
+      const isStage = seg.type === 'stage';
+      const isInner = seg.type === 'inner';
+      const cleanedText = scrubForSpeech(seg.text);
+      if (!cleanedText) { playNext(); return; }
+
+      if (!ttsFailedRef.current) {
+        playViaChatterbox(cleanedText, isStage, isInner)
+          .then(() => playNext())
+          .catch(() => {
+            ttsFailedRef.current = true; // fall back to Web Speech for the rest of this session
+            playViaWebSpeech(cleanedText, isStage, isInner);
+          });
+      } else {
+        playViaWebSpeech(cleanedText, isStage, isInner);
+      }
+    };
+
     const startQueue = () => { setIsSpeaking(true); playNext(); };
-    if (voices.length > 0) startQueue();
+    if (ttsFailedRef.current === false || voices.length > 0) startQueue();
     else window.speechSynthesis.onvoiceschanged = startQueue;
   }, [speechEnabled, getVoiceProfile]);
 
@@ -2587,7 +2633,11 @@ export default function Profess() {
     talkTimerRef.current = setTimeout(() => setIsTalking(false), 200);
   };
 
-  const stopSpeech = () => { window.speechSynthesis?.cancel(); setIsSpeaking(false); setIsTalking(false); };
+  const stopSpeech = () => {
+    window.speechSynthesis?.cancel();
+    if (ttsAudioRef.current) { ttsAudioRef.current.pause(); ttsAudioRef.current.currentTime = 0; }
+    setIsSpeaking(false); setIsTalking(false);
+  };
 
   const toggleMic = useCallback(() => {
     setMicError(null);
