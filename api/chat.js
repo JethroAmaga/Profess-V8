@@ -38,12 +38,13 @@ export default async function handler(req, res) {
     }
   }
 
-  // deepseek-v4-pro is the default — z-ai/glm-5.1 has been frequently
-  // returning 503 (worker pool saturated), so it's now only used as a
-  // fallback rather than the primary model. NVIDIA_MODEL env override is
-  // intentionally ignored here so a stale env var can't force z-ai back in.
-  const PRIMARY_MODEL = "deepseek-ai/deepseek-v4-pro";
-  const FALLBACK_MODEL = "z-ai/glm-5.1";
+  // deepseek-v4-pro and z-ai/glm-5.1 are both popular, heavily-trafficked
+  // NIM models and were getting 503/500/timeout constantly. Switched to
+  // older, less-popular models that tend to have spare worker capacity on
+  // NIM's free tier. NVIDIA_MODEL env override is intentionally ignored
+  // here so a stale env var can't reintroduce the old models.
+  const PRIMARY_MODEL = "meta/llama-3.1-8b-instruct";
+  const FALLBACK_MODEL = "mistralai/mistral-7b-instruct-v0.3";
 
   async function callNvidia(model, nvMessages) {
     const controller = new AbortController();
