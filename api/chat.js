@@ -72,7 +72,17 @@ export default async function handler(req, res) {
           ...(model.includes("deepseek") ? { chat_template_kwargs: { thinking: false } } : {}),
         }),
       });
-      const data = await response.json();
+      // Some NIM models occasionally return a malformed/non-JSON body (seen
+      // from qwen) even with stream:false — parse the raw text ourselves so
+      // a parse failure can be treated as a retryable error instead of an
+      // uncaught exception that skips the fallback model entirely.
+      const raw = await response.text();
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        throw new Error(`Non-JSON response from ${model} (status ${response.status})`);
+      }
       return { response, data };
     } finally {
       clearTimeout(timeout);
@@ -85,9 +95,10 @@ export default async function handler(req, res) {
   ];
 
   // Calls a model and reports whether the caller should retry with the
-  // fallback model: 503/429/500 *and* a timeout (the model hung past 25s)
-  // are both treated as retryable, so a slow/hanging primary doesn't skip
-  // the fallback the way a plain AbortError catch would.
+  // fallback model: 503/429/500, a timeout (model hung past 25s), and any
+  // other thrown error (e.g. a malformed/non-JSON body) are all treated as
+  // retryable, so a single bad response from the primary never skips the
+  // fallback model by bubbling up as an uncaught exception.
   async function attempt(model) {
     try {
       const { response, data } = await callNvidia(model, nvMessages);
@@ -101,7 +112,8 @@ export default async function handler(req, res) {
         console.error(`NVIDIA ${model} timed out after 25s`);
         return { retry: true, timedOut: true };
       }
-      throw err;
+      console.error(`NVIDIA ${model} request failed: ${err.message}`);
+      return { retry: true };
     }
   }
 
