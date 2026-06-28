@@ -2234,6 +2234,7 @@ export default function Profess() {
   const [micError, setMicError] = useState(null);
   const [showPlayer, setShowPlayer] = useState(false);
   const ttsAudioRef = useRef(null);
+  const speechStoppedRef = useRef(false);
   const [activePlaylist, setActivePlaylist] = useState(0);
   const [showMusicSuggest, setShowMusicSuggest] = useState(false);
   const [showDesktopMusicHint, setShowDesktopMusicHint] = useState(false);
@@ -2537,6 +2538,7 @@ export default function Profess() {
 
     const queue = segments.filter(s => s.text.trim());
     if (!queue.length) return;
+    speechStoppedRef.current = false;
 
     const voices = window.speechSynthesis?.getVoices() || [];
     let idx = 0;
@@ -2582,6 +2584,7 @@ export default function Profess() {
         body: JSON.stringify({ text: cleanedText, language: lang === "id" ? "id" : "en" }),
       });
       const data = await res.json();
+      if (speechStoppedRef.current) return;
       if (!res.ok || !data.audio) {
         const msg = data?.error?.message || data?.error?.detail || (typeof data?.error === "string" ? data.error : null);
         throw new Error(msg || "ElevenLabs TTS unavailable");
@@ -2607,6 +2610,7 @@ export default function Profess() {
     };
 
     const playNext = () => {
+      if (speechStoppedRef.current) { setIsSpeaking(false); stopTalking(); return; }
       if (idx >= queue.length) { setIsSpeaking(false); stopTalking(); return; }
       const seg = queue[idx++];
       const isStage = seg.type === 'stage';
@@ -2617,6 +2621,7 @@ export default function Profess() {
       playViaElevenLabs(cleanedText, isStage, isInner)
         .then(() => playNext())
         .catch(() => {
+          if (speechStoppedRef.current) { setIsSpeaking(false); stopTalking(); return; }
           playViaWebSpeech(cleanedText, isStage, isInner).then(() => playNext());
         });
     };
@@ -2670,6 +2675,11 @@ export default function Profess() {
   };
 
   const stopSpeech = () => {
+    // Setting this flag stops the whole speech queue (dialog + inner thought),
+    // not just whatever happens to be playing right now — without it, a
+    // segment still in-flight (e.g. mid-fetch to /api/tts) would play anyway
+    // once it resolved, and the queue would carry on to the next segment.
+    speechStoppedRef.current = true;
     window.speechSynthesis?.cancel();
     if (ttsAudioRef.current) { ttsAudioRef.current.pause(); ttsAudioRef.current.currentTime = 0; }
     setIsSpeaking(false); setIsTalking(false);
@@ -2678,9 +2688,9 @@ export default function Profess() {
   const toggleMic = useCallback(() => {
     setMicError(null);
     if (isListening) { recognitionRef.current?.stop(); setIsListening(false); return; }
+    if (isSpeaking) return;
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { setMicError("Speech recognition requires Chrome or Edge."); return; }
-    stopSpeech();
     const r = new SR(); r.continuous = true; r.interimResults = true; r.lang = lang === "id" ? "id-ID" : "en-US";
     let final = "";
     r.onstart = () => setIsListening(true);
@@ -2688,7 +2698,7 @@ export default function Profess() {
     r.onerror = (e) => { setIsListening(false); if(e.error==="not-allowed")setMicError("Mic access denied."); else if(e.error!=="aborted")setMicError("Mic error: "+e.error); };
     r.onend = () => { setIsListening(false); if(final.trim()) setTimeout(()=>document.getElementById("psend")?.click(),300); };
     recognitionRef.current = r; r.start();
-  }, [isListening, stopSpeech]);
+  }, [isListening, isSpeaking]);
 
   const changeRoleAndMood = (newRole, newMood, newMode, charName, charTitle, charGender) => {
     const newInRole = newMode === "dialog";
@@ -4565,10 +4575,10 @@ export default function Profess() {
             onMouseLeave={e=>{ e.currentTarget.style.background="none"; e.currentTarget.style.color="#C8A458"; }}>
             <div style={{ width:"20px", height:"25px" }} dangerouslySetInnerHTML={{ __html: coachIconSVG }}/>
           </button>
-          <button onClick={toggleMic} className={isListening?"mic-active":""}
-            style={{ background:isListening?"#180C0C":"none", border:"none", borderRight:isMobile?"none":"1px solid #1A1A1A", borderBottom:isMobile?"1px solid #1A1A1A":"none", color:isListening?"#BC7A7A":"#C8A458", width:btnSz, height:btnSz, boxSizing:"border-box", padding:0, margin:0, display:"flex", alignItems:"center", justifyContent:"center", transition:"all .2s" }}
-            onMouseEnter={e=>{ if(!isListening){e.currentTarget.style.background="#1A1612";e.currentTarget.style.color="#C8A458";} }}
-            onMouseLeave={e=>{ if(!isListening){e.currentTarget.style.background="none";e.currentTarget.style.color="#C8A458";} }}>
+          <button onClick={toggleMic} disabled={isSpeaking} className={isListening?"mic-active":""}
+            style={{ background:isListening?"#180C0C":"none", border:"none", borderRight:isMobile?"none":"1px solid #1A1A1A", borderBottom:isMobile?"1px solid #1A1A1A":"none", color:isListening?"#BC7A7A":isSpeaking?"#2A2A2A":"#C8A458", width:btnSz, height:btnSz, boxSizing:"border-box", padding:0, margin:0, display:"flex", alignItems:"center", justifyContent:"center", transition:"all .2s", opacity:isSpeaking?0.4:1, cursor:isSpeaking?"default":"pointer" }}
+            onMouseEnter={e=>{ if(!isListening&&!isSpeaking){e.currentTarget.style.background="#1A1612";e.currentTarget.style.color="#C8A458";} }}
+            onMouseLeave={e=>{ if(!isListening&&!isSpeaking){e.currentTarget.style.background="none";e.currentTarget.style.color="#C8A458";} }}>
             {isListening ? <IconStop/> : <IconMic/>}
           </button>
           <button id="psend" onClick={sendMessage} disabled={loading||!input.trim()}
