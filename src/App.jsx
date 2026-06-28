@@ -2193,7 +2193,6 @@ export default function Profess() {
   const [micError, setMicError] = useState(null);
   const [showPlayer, setShowPlayer] = useState(false);
   const ttsAudioRef = useRef(null);
-  const [ttsNotice, setTtsNotice] = useState(null); // honest popup when ElevenLabs TTS fails/credits run out
   const [activePlaylist, setActivePlaylist] = useState(0);
   const [showMusicSuggest, setShowMusicSuggest] = useState(false);
   const [showDesktopMusicHint, setShowDesktopMusicHint] = useState(false);
@@ -2498,7 +2497,37 @@ export default function Profess() {
     const queue = segments.filter(s => s.text.trim());
     if (!queue.length) return;
 
+    const voices = window.speechSynthesis?.getVoices() || [];
     let idx = 0;
+    const playViaWebSpeech = (cleanedText, isStage, isInner) => new Promise((resolve) => {
+      if (!window.speechSynthesis) { resolve(); return; }
+      const utterance = new SpeechSynthesisUtterance(cleanedText);
+      const profile = isStage
+        ? (() => {
+            const coachVoice = voices.find(v => v.name === 'Google UK English Male') ||
+              voices.find(v => v.lang?.startsWith('en'));
+            return { voice: coachVoice, rate: 0.92, pitch: 0.96, volume: 0.62 };
+          })()
+        : getVoiceProfile(role, mood, inRole, isInner);
+
+      if (profile.voice) utterance.voice = profile.voice;
+      utterance.rate = profile.rate;
+      utterance.pitch = profile.pitch;
+      utterance.volume = profile.volume;
+
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+        if (!isStage && !isInner) startTalking(); else stopTalking();
+      };
+      utterance.onend = resolve;
+      utterance.onerror = resolve;
+      utterance.onboundary = () => {
+        if (!isStage && !isInner) { setIsTalking(true); setTimeout(() => setIsTalking(false), 160); }
+      };
+
+      window.speechSynthesis.speak(utterance);
+    });
+
     const playViaElevenLabs = async (cleanedText, isStage, isInner) => {
       const res = await fetch("/api/tts", {
         method: "POST",
@@ -2539,19 +2568,14 @@ export default function Profess() {
 
       playViaElevenLabs(cleanedText, isStage, isInner)
         .then(() => playNext())
-        .catch((err) => {
-          setIsSpeaking(false); stopTalking();
-          setTtsNotice(
-            lang === "id"
-              ? "Suara AI tidak tersedia saat ini (kemungkinan kredit ElevenLabs habis atau terjadi gangguan). Ini keterbatasan proyek demo ini — teks balasan tetap bisa dibaca seperti biasa."
-              : "AI voice is unavailable right now (likely ElevenLabs credits ran out or a service issue). This is a known limitation of this demo project — the reply text is still readable as usual."
-          );
+        .catch(() => {
+          playViaWebSpeech(cleanedText, isStage, isInner).then(() => playNext());
         });
     };
 
     setIsSpeaking(true);
     playNext();
-  }, [speechEnabled, lang]);
+  }, [speechEnabled, lang, getVoiceProfile]);
 
   const speak = useCallback((text, role, mood, inRole, innerThought = null) => {
     if (!speechEnabled) return;
@@ -4564,13 +4588,6 @@ export default function Profess() {
     <div style={{ ...BASE, display:"flex", flexDirection:"column" }}>
       <style>{css}</style>
       <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:-1 }}><DottedGlowBackground/></div>
-
-      {ttsNotice && (
-        <div style={{ position:"fixed", bottom:"24px", left:"50%", transform:"translateX(-50%)", zIndex:1000, maxWidth:"min(90vw, 420px)", background:"#0E0808", border:"1px solid #4A2828", borderRadius:"8px", padding:"14px 16px", display:"flex", gap:"10px", alignItems:"flex-start", boxShadow:"0 8px 24px rgba(0,0,0,.4)" }}>
-          <span style={{ fontSize:"12px", color:"#D8A8A8", lineHeight:1.5, flex:1 }}>{ttsNotice}</span>
-          <button onClick={() => setTtsNotice(null)} style={{ background:"none", border:"none", color:"#7A4848", cursor:"pointer", fontSize:"14px", padding:0, flexShrink:0 }}>✕</button>
-        </div>
-      )}
 
       {/* Session header */}
       <div style={{ padding:`0 ${isMobile?"16px":"32px"}`, height:isMobile?"48px":"56px", borderBottom:"1px solid #141414", display:"flex", alignItems:"center", gap:"16px", flexShrink:0 }}>
