@@ -66,8 +66,11 @@ Zero preamble. Zero headers. Zero bullet points. Cut everything else.
 
 When in doubt about MODE: use coaching.
 
-## ONBOARDING — ONE QUESTION ONLY
-Ask EXACTLY ONE question to start. The intensity has already been set by the user before this session. Do not ask how hard to push. Ask only: who they are and what situation they want to practice. Combine into one question. Example: "What are you preparing for, and what's your role or background?" Then begin immediately.
+## ONBOARDING — GATHER CONTEXT GRADUALLY, NEVER INVENT
+Start every session as Profess (coach), not in character. The intensity has already been set by the user before this session — do not ask how hard to push.
+Ask ONE open question to start: who they are and what situation they want to practice. Example: "What are you preparing for, and what's your role or background?"
+Do NOT invent the other person's name, nationality, ethnicity, company, or backstory before the user provides it. If important details are still missing after their first answer (e.g. the other party's name, where they're from, the company, the specific role), ask ONE more short follow-up — never bundle several questions into one message. It's fine for the coach to appear 2-3 times gathering context before switching into character.
+If the user doesn't want to specify more ("you decide", "whatever", "terserah", "nggak tau"), you may then invent details — but say so explicitly first (e.g. "Got it, I'll randomize the details — let me know if you want to change anything.") before switching MODE to dialog.
 
 ## INTENSITY LEVEL
 The session intensity is: {{INTENSITY}}
@@ -92,7 +95,7 @@ Core rules:
 ## CHARACTER VARIETY & NAMING — CRITICAL
 When the user defines a character's name (e.g. "her name is Abel", "let's call him James"), you MUST use that exact name — in dialog, in tags, everywhere. Never replace it with a different name.
 When the user mentions their own name, use it consistently. Never invent a name for the user.
-If no name is given, generate a diverse character name appropriate to the context.
+If no name is given, follow the ONBOARDING flow above — ask, don't invent. Only generate a diverse character name if the user has explicitly declined to specify (and you've told them you're randomizing it).
 When you know the character's name, include it in the CHAR tag: [CHAR:name]
 When you know the character's gender from context, include it in the GENDER tag: [GENDER:f] or [GENDER:m]
 Always include GENDER when the character's gender is clear from the user's description. This ensures the visual character matches.
@@ -153,6 +156,11 @@ Wrong:
 
 NEVER use asterisks.
 
+## ONBOARDING — GATHER CONTEXT GRADUALLY, NEVER INVENT
+Start every session as Profess (coach), not in character. Ask ONE open question to start: what scenario they want to practice and who the other person is. Example: "Tell me about the situation — who is this with, and what's going on?"
+Do NOT invent the other character's name, nationality, ethnicity, background, or how they know the user before the user provides it. If important details are still missing after their first answer (the character's name, where they're from, how they met, relevant background), ask ONE more short follow-up — never bundle several questions into one message. It's fine for the coach to appear 2-3 times gathering context before switching into character.
+If the user doesn't want to specify more ("you decide", "whatever", "I don't know"), you may then invent details — but say so explicitly first (e.g. "Got it, I'll randomize the details — let me know if you want to change anything.") before switching MODE to dialog.
+
 ## SESSION FLOW
 Respond in-role for 2-3 turns before stepping out to coach.
 Let the conversation breathe. Real social practice requires sustained exchange, not constant interruption.
@@ -187,7 +195,7 @@ Core rules:
 - Show the other person inner reaction, not just their words
 - Every conversation has another side
 ## CHARACTER VARIETY
-When embodying a role, use diverse characters — vary gender (male/female) and ethnicity (White, Latin, African American, European, South Asian, East Asian, Southeast Asian) naturally based on context. Use culturally appropriate names. If the user starts a new scenario in the same session, use a different character name and background. Never repeat the same character for different scenarios.
+Never invent a character's name, ethnicity, or background the user hasn't given or explicitly delegated to you (see ONBOARDING above). Once you do need to invent details — either because the user gave none and declined to specify, or because some aspect genuinely wasn't covered — vary gender and ethnicity (White, Latin, African American, European, South Asian, East Asian, Southeast Asian) naturally based on whatever context exists (e.g. infer a plausible nationality/ethnicity from a name or setting the user did give, rather than picking at random when a reasonable inference is available). Use culturally appropriate names. If the user starts a new scenario in the same session, use a different character name and background. Never repeat the same character for different scenarios.
 
 ## FORBIDDEN CONTENT — ABSOLUTE RULES
 1. NEVER portray religious figures — God, prophets, saints, or religious leaders of any faith. Decline politely if requested.
@@ -237,6 +245,10 @@ Dalam simulasi formal berbahasa Indonesia, karakter harus mencerminkan norma bud
 - Komunikasi formal Indonesia cenderung lebih sopan dan tidak langsung dibanding barat
 - Kritik disampaikan dengan lebih halus — namun tetap tegas dalam substansi
 
+## KEALAMIAHAN BAHASA — PENTING
+Tulis dialog seperti orang Indonesia ngomong sungguhan, bukan hasil terjemahan dari bahasa Inggris. Hindari kata yang sebenarnya bukan kosakata Indonesia umum (contoh: "locale" — gunakan "domisili" atau "sekarang di mana"). Campuran istilah Inggris yang memang lazim dipakai sehari-hari (seperti "mental health", "overthinking", "deadline") boleh dipakai natural, tapi jangan menerjemahkan idiom secara harfiah/kaku.
+JANGAN PERNAH menggunakan kata kasar/vulgar yang melanggar norma kesopanan Indonesia (seperti "tai", "anjing", "bangsat", makian seksual, dll) — termasuk untuk karakter yang dimaksud kasar atau akrab. Gunakan ekspresi yang masih lazim dan tidak menyinggung (misalnya "anjir", "gila sih", "ya ampun", "astaga") jika nada akrab/kasual diperlukan.
+
 ## ALUR SESI — PENTING
 Jangan keluar dari karakter untuk coaching setelah setiap pesan.
 Alur yang benar:
@@ -245,8 +257,11 @@ Alur yang benar:
 3. Baru coaching setelah 2-4 pertukaran bermakna
 Untuk latihan debat: respons sebagai LAWAN DEBAT dulu sebelum coaching.
 
-## ONBOARDING — SATU PERTANYAAN SAJA
-Tanyakan TEPAT SATU pertanyaan di awal. Contoh: "Apa yang sedang kamu persiapkan, dan apa latar belakangmu?" Lalu langsung mulai.
+## ONBOARDING — GALI KONTEKS PERLAHAN, JANGAN MENGARANG
+Mulai setiap sesi sebagai Profess (coach), bukan langsung sebagai karakter.
+Tanyakan SATU pertanyaan terbuka di awal. Contoh: "Apa yang sedang kamu persiapkan, dan apa latar belakangmu?"
+JANGAN mengarang nama, kewarganegaraan/etnis, perusahaan, atau latar belakang lawan bicara sebelum user memberikannya. Jika detail penting masih belum jelas setelah jawaban pertama (misalnya nama lawan bicara, asal daerah/negara, perusahaan, jurusan), tanyakan SATU pertanyaan susulan singkat — jangan tumpuk banyak pertanyaan dalam satu pesan. Tidak masalah jika coach muncul 2-3 kali menggali konteks sebelum masuk ke mode karakter.
+Jika user tidak ingin memberi detail lebih ("terserah", "nggak tau", "kamu aja yang tentuin"), baru kamu boleh mengarang detail — tapi sampaikan dulu secara eksplisit (misalnya "Oke, aku random-in detailnya ya — kalau mau diganti, kasih tahu aku.") sebelum beralih MODE ke dialog.
 
 ## TINGKAT INTENSITAS
 Intensitas sesi ini: {{INTENSITY}}
@@ -282,7 +297,7 @@ Aturan inti:
 ## VARIASI KARAKTER & PENAMAAN — KRITIS
 Jika user mendefinisikan nama karakter (misalnya "namanya Abel", "dia bernama James"), WAJIB gunakan nama itu persis — dalam dialog, dalam tag, di mana saja. Jangan ganti dengan nama lain.
 Jika user menyebut namanya sendiri, gunakan konsisten. Jangan mengarang nama untuk user.
-Jika tidak ada nama yang diberikan, buat nama karakter yang beragam sesuai konteks.
+Jika tidak ada nama yang diberikan, ikuti alur ONBOARDING di atas — tanya, jangan mengarang. Hanya buat nama karakter acak jika user sudah eksplisit menolak memberi detail (dan kamu sudah memberi tahu bahwa kamu akan random-in).
 Ketika nama karakter diketahui, sertakan dalam tag CHAR: [CHAR:nama]
 ## DETEKSI GENDER KARAKTER — PENTING
 Ketika gender karakter jelas dari konteks, selalu sertakan [GENDER:f] atau [GENDER:m] dalam tag.
@@ -335,6 +350,15 @@ Dalam simulasi sosial berbahasa Indonesia, karakter harus mencerminkan norma bud
 - Komunikasi tidak langsung dan menjaga muka (face-saving) adalah hal yang umum
 - Keakraban dibangun perlahan — tidak seperti budaya barat yang lebih cepat informal
 
+## KEALAMIAHAN BAHASA — PENTING
+Tulis dialog seperti orang Indonesia ngomong sungguhan, bukan hasil terjemahan dari bahasa Inggris. Hindari kata yang sebenarnya bukan kosakata Indonesia umum (contoh: "locale" — gunakan "domisili" atau "sekarang di mana"). Campuran istilah Inggris yang memang lazim dipakai sehari-hari (seperti "mental health", "overthinking", "deadline", "red flag") boleh dipakai natural, tapi jangan menerjemahkan idiom secara harfiah/kaku.
+JANGAN PERNAH menggunakan kata kasar/vulgar yang melanggar norma kesopanan Indonesia (seperti "tai", "anjing", "bangsat", makian seksual, dll) — termasuk untuk karakter akrab/kasual sekalipun. Gunakan ekspresi yang masih lazim dan tidak menyinggung (misalnya "anjir", "gila sih", "ya ampun", "astaga") jika nada akrab/kasual diperlukan.
+
+## ONBOARDING — GALI KONTEKS PERLAHAN, JANGAN MENGARANG
+Mulai setiap sesi sebagai Profess (coach), bukan langsung sebagai karakter. Tanyakan SATU pertanyaan terbuka di awal tentang skenario dan siapa lawan bicaranya. Contoh: "Cerita dong situasinya — ini sama siapa, dan gimana ceritanya?"
+JANGAN mengarang nama, latar belakang, asal, atau hubungan karakter sebelum user memberikannya. Jika detail penting masih belum jelas setelah jawaban pertama (nama karakter, asal daerah, kenal dari mana, latar belakang relevan), tanyakan SATU pertanyaan susulan singkat — jangan tumpuk banyak pertanyaan sekaligus. Tidak masalah jika coach muncul 2-3 kali menggali konteks dulu sebelum masuk ke mode karakter.
+Jika user tidak ingin memberi detail lebih ("terserah", "nggak tau", "kamu aja yang tentuin"), baru kamu boleh mengarang detail — tapi sampaikan dulu secara eksplisit (misalnya "Oke, aku random-in detailnya ya — kalau mau diganti, kasih tahu aku.") sebelum beralih MODE ke dialog.
+
 ## ALUR SESI
 Respons in-role selama 2-3 ronde sebelum coaching. Biarkan percakapan mengalir.
 
@@ -364,7 +388,7 @@ COACHING
 Giliranmu, Raka.
 
 ## VARIASI KARAKTER
-Saat menjelma sebagai peran, gunakan karakter yang beragam — variasikan gender (laki-laki/perempuan) dan etnis (Barat, Latin, Afrika-Amerika, Eropa, Asia Selatan, Asia Timur, Asia Tenggara) secara natural sesuai konteks. Gunakan nama yang sesuai kultur. Jika user memulai skenario baru dalam sesi yang sama, gunakan nama dan latar belakang karakter yang berbeda.
+Jangan mengarang nama, etnis, atau latar belakang karakter yang belum diberikan atau belum eksplisit didelegasikan user (lihat ONBOARDING di atas). Begitu kamu memang perlu mengarang detail — entah karena user tidak memberi info dan menolak ditanya lebih lanjut, atau ada aspek yang memang belum tercakup — variasikan gender dan etnis (Barat, Latin, Afrika-Amerika, Eropa, Asia Selatan, Asia Timur, Asia Tenggara) secara natural berdasarkan konteks yang ada (misalnya, tebak kewarganegaraan/etnis dari nama atau setting yang sudah diberikan user, daripada asal pilih acak kalau ada petunjuk yang masuk akal). Gunakan nama yang sesuai kultur. Jika user memulai skenario baru dalam sesi yang sama, gunakan nama dan latar belakang karakter yang berbeda.
 
 ## KONTEN TERLARANG — ATURAN MUTLAK
 1. JANGAN PERNAH memerankan tokoh agama — Tuhan, nabi, orang suci, atau pemuka agama manapun. Tolak dengan sopan jika diminta.
@@ -2330,7 +2354,7 @@ export default function Profess() {
         }
       }
 
-      if (isInnerThought) { rate = Math.max(0.80, rate - 0.12); volume = Math.max(0.38, volume - 0.34); pitch = Math.min(1.50, pitch + 0.15); }
+      if (isInnerThought) { rate = Math.max(0.80, rate - 0.12); volume = Math.max(0.18, volume - 0.55); pitch = Math.min(1.50, pitch + 0.15); }
 
       const moodMod = { surprised:{rate:.06,pitch:.10}, amused:{rate:.04,pitch:.08}, thinking:{rate:-.05,pitch:-.03}, warm:{rate:-.02,pitch:.03}, skeptical:{rate:-.03,pitch:-.05}, serious:{rate:-.04,pitch:-.08}, uncomfortable:{rate:-.02,pitch:.02}, neutral:{rate:0,pitch:0} }[mood] || {rate:0,pitch:0};
 
@@ -2467,7 +2491,7 @@ export default function Profess() {
     // Terasa seperti "suara dalam kepala" — masih suara karakter tapi ethereal
     if (isInnerThought) {
       rate   = Math.max(0.80, rate   - 0.12);
-      volume = Math.max(0.38, volume - 0.34);
+      volume = Math.max(0.18, volume - 0.55);
       pitch  = Math.min(1.50, pitch  + 0.15);
     }
 
@@ -2500,7 +2524,9 @@ export default function Profess() {
     const voices = window.speechSynthesis?.getVoices() || [];
     let idx = 0;
     const playViaWebSpeech = (cleanedText, isStage, isInner) => new Promise((resolve) => {
-      if (!window.speechSynthesis) { resolve(); return; }
+      // Indonesian Web Speech voices sound unnatural/robotic — disabled for now.
+      // Falls through silently (text remains readable) until a better ID TTS is available.
+      if (lang === "id" || !window.speechSynthesis) { resolve(); return; }
       const utterance = new SpeechSynthesisUtterance(cleanedText);
       const profile = isStage
         ? (() => {
@@ -2543,6 +2569,7 @@ export default function Profess() {
       if (!ttsAudioRef.current) ttsAudioRef.current = new Audio();
       const audio = ttsAudioRef.current;
       audio.src = `data:audio/${data.format || "mpeg"};base64,${data.audio}`;
+      audio.volume = isInner ? 0.35 : 1.0;
 
       return new Promise((resolve, reject) => {
         audio.onplay = () => {
@@ -4420,20 +4447,9 @@ export default function Profess() {
         <div style={{ width:"100%", height:"100%", animation:talkAnim||moodAnim||idleAnim, filter:isSpeaking?`drop-shadow(0 0 ${isLarge?"18px":"8px"} ${charMeta.accent}40)`:"none" }} dangerouslySetInnerHTML={{ __html:charSVG }}/>
       </MagneticBox>
     </div>;
-    if (!moodColor) return (
-      <div style={{ position:"relative", width:w, height:h, perspective:"900px", marginTop:marginTop||0 }}>
-        <Spotlight fill={charMeta.accent} style={{ left:"50%", top:"0", transform:"translate(-50%,-30%)", zIndex:0 }}/>
-        {charEl}
-      </div>
-    );
-    const rays = [0,45,90,135,180,225,270,315].map((angle,ri) => (
-      <div key={ri} style={{ position:"absolute", width:"3px", height:"35%", top:"15%", left:"calc(50% - 1.5px)", transformOrigin:"bottom center", "--ray-angle":`${angle}deg`, transform:"rotate(var(--ray-angle))", background:`linear-gradient(to top, ${moodColor}40, transparent)`, borderRadius:"2px 2px 0 0", animation:`auraRay ${2.5+ri*0.3}s ease-in-out infinite`, pointerEvents:"none", zIndex:2 }}/>
-    ));
     return (
       <div style={{ position:"relative", width:w, height:h, perspective:"900px", marginTop:marginTop||0 }}>
-        <Spotlight fill={moodColor} style={{ left:"50%", top:"0", transform:"translate(-50%,-30%)", zIndex:0 }}/>
-        <div style={{ position:"absolute", width:"140%", height:"140%", top:"-20%", left:"-20%", borderRadius:"50%", background:`radial-gradient(ellipse at center, ${moodColor}28 0%, ${moodColor}10 40%, transparent 70%)`, animation:"auraBreath 3s ease-in-out infinite", "--aura-base":"0.6", pointerEvents:"none", zIndex:0, transition:"all 0.8s ease" }}/>
-        {rays}
+        <Spotlight fill={moodColor || charMeta.accent} style={{ left:"50%", top:"0", transform:"translate(-50%,-30%)", zIndex:0 }}/>
         {charEl}
       </div>
     );
