@@ -2193,7 +2193,7 @@ export default function Profess() {
   const [micError, setMicError] = useState(null);
   const [showPlayer, setShowPlayer] = useState(false);
   const ttsAudioRef = useRef(null);
-  const ttsFailedRef = useRef(false); // once Chatterbox fails, stop retrying for this session
+  const [ttsNotice, setTtsNotice] = useState(null); // honest popup when ElevenLabs TTS fails/credits run out
   const [activePlaylist, setActivePlaylist] = useState(0);
   const [showMusicSuggest, setShowMusicSuggest] = useState(false);
   const [showDesktopMusicHint, setShowDesktopMusicHint] = useState(false);
@@ -2493,74 +2493,40 @@ export default function Profess() {
   }, []);
 
   const speakSegments = useCallback((segments, role, mood, inRole) => {
-    if (!speechEnabled || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+    if (!speechEnabled) return;
 
-    const voices = window.speechSynthesis.getVoices();
     const queue = segments.filter(s => s.text.trim());
     if (!queue.length) return;
 
     let idx = 0;
-    const playViaWebSpeech = (cleanedText, isStage, isInner) => {
-      const utterance = new SpeechSynthesisUtterance(cleanedText);
-      // Stage: coach narrator voice
-      // Inner: same voice as character but with isInnerThought modulation
-      // Dialog: normal character voice
-      const profile = isStage
-        ? (() => {
-            const coachVoice = voices.find(v => v.name === 'Google UK English Male') ||
-              voices.find(v => v.lang?.startsWith('en'));
-            return { voice: coachVoice, rate: 0.92, pitch: 0.96, volume: 0.62 };
-          })()
-        : getVoiceProfile(role, mood, inRole, isInner);
-
-      if (profile.voice) utterance.voice = profile.voice;
-      utterance.rate = profile.rate;
-      utterance.pitch = profile.pitch;
-      utterance.volume = profile.volume;
-
-      utterance.onstart = () => {
-        setIsSpeaking(true);
-        if (!isStage && !isInner) startTalking(); else stopTalking();
-      };
-      utterance.onend = () => { playNext(); };
-      utterance.onerror = () => { playNext(); };
-      utterance.onboundary = () => {
-        if (!isStage && !isInner) { setIsTalking(true); setTimeout(() => setIsTalking(false), 160); }
-      };
-
-      window.speechSynthesis.speak(utterance);
-    };
-
-    const playViaChatterbox = async (cleanedText, isStage, isInner) => {
-      try {
-        const res = await fetch("/api/tts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: cleanedText, language: lang === "id" ? "id" : "en" }),
-        });
-        const data = await res.json();
-        if (!res.ok || !data.audio) throw new Error("tts unavailable");
-
-        if (!ttsAudioRef.current) ttsAudioRef.current = new Audio();
-        const audio = ttsAudioRef.current;
-        audio.src = `data:audio/${data.format || "mp3"};base64,${data.audio}`;
-
-        return new Promise((resolve, reject) => {
-          audio.onplay = () => {
-            setIsSpeaking(true);
-            if (!isStage && !isInner) startTalking(); else stopTalking();
-          };
-          audio.ontimeupdate = () => {
-            if (!isStage && !isInner) { setIsTalking(true); setTimeout(() => setIsTalking(false), 160); }
-          };
-          audio.onended = resolve;
-          audio.onerror = () => reject(new Error("playback error"));
-          audio.play().catch(reject);
-        });
-      } catch {
-        return Promise.reject(new Error("chatterbox failed"));
+    const playViaElevenLabs = async (cleanedText, isStage, isInner) => {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: cleanedText, language: lang === "id" ? "id" : "en" }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.audio) {
+        const msg = data?.error?.message || data?.error?.detail || (typeof data?.error === "string" ? data.error : null);
+        throw new Error(msg || "ElevenLabs TTS unavailable");
       }
+
+      if (!ttsAudioRef.current) ttsAudioRef.current = new Audio();
+      const audio = ttsAudioRef.current;
+      audio.src = `data:audio/${data.format || "mpeg"};base64,${data.audio}`;
+
+      return new Promise((resolve, reject) => {
+        audio.onplay = () => {
+          setIsSpeaking(true);
+          if (!isStage && !isInner) startTalking(); else stopTalking();
+        };
+        audio.ontimeupdate = () => {
+          if (!isStage && !isInner) { setIsTalking(true); setTimeout(() => setIsTalking(false), 160); }
+        };
+        audio.onended = resolve;
+        audio.onerror = () => reject(new Error("Audio playback error"));
+        audio.play().catch(reject);
+      });
     };
 
     const playNext = () => {
@@ -2571,26 +2537,24 @@ export default function Profess() {
       const cleanedText = scrubForSpeech(seg.text);
       if (!cleanedText) { playNext(); return; }
 
-      if (!ttsFailedRef.current) {
-        playViaChatterbox(cleanedText, isStage, isInner)
-          .then(() => playNext())
-          .catch(() => {
-            ttsFailedRef.current = true; // fall back to Web Speech for the rest of this session
-            playViaWebSpeech(cleanedText, isStage, isInner);
-          });
-      } else {
-        playViaWebSpeech(cleanedText, isStage, isInner);
-      }
+      playViaElevenLabs(cleanedText, isStage, isInner)
+        .then(() => playNext())
+        .catch((err) => {
+          setIsSpeaking(false); stopTalking();
+          setTtsNotice(
+            lang === "id"
+              ? "Suara AI tidak tersedia saat ini (kemungkinan kredit ElevenLabs habis atau terjadi gangguan). Ini keterbatasan proyek demo ini — teks balasan tetap bisa dibaca seperti biasa."
+              : "AI voice is unavailable right now (likely ElevenLabs credits ran out or a service issue). This is a known limitation of this demo project — the reply text is still readable as usual."
+          );
+        });
     };
 
-    const startQueue = () => { setIsSpeaking(true); playNext(); };
-    if (ttsFailedRef.current === false || voices.length > 0) startQueue();
-    else window.speechSynthesis.onvoiceschanged = startQueue;
-  }, [speechEnabled, getVoiceProfile]);
+    setIsSpeaking(true);
+    playNext();
+  }, [speechEnabled, lang]);
 
   const speak = useCallback((text, role, mood, inRole, innerThought = null) => {
-    if (!speechEnabled || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+    if (!speechEnabled) return;
     const segments = parseSegments(text);
     if (!segments.length && !innerThought) return;
     // Add inner thought as final segment with special marker
@@ -4600,6 +4564,13 @@ export default function Profess() {
     <div style={{ ...BASE, display:"flex", flexDirection:"column" }}>
       <style>{css}</style>
       <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:-1 }}><DottedGlowBackground/></div>
+
+      {ttsNotice && (
+        <div style={{ position:"fixed", bottom:"24px", left:"50%", transform:"translateX(-50%)", zIndex:1000, maxWidth:"min(90vw, 420px)", background:"#0E0808", border:"1px solid #4A2828", borderRadius:"8px", padding:"14px 16px", display:"flex", gap:"10px", alignItems:"flex-start", boxShadow:"0 8px 24px rgba(0,0,0,.4)" }}>
+          <span style={{ fontSize:"12px", color:"#D8A8A8", lineHeight:1.5, flex:1 }}>{ttsNotice}</span>
+          <button onClick={() => setTtsNotice(null)} style={{ background:"none", border:"none", color:"#7A4848", cursor:"pointer", fontSize:"14px", padding:0, flexShrink:0 }}>✕</button>
+        </div>
+      )}
 
       {/* Session header */}
       <div style={{ padding:`0 ${isMobile?"16px":"32px"}`, height:isMobile?"48px":"56px", borderBottom:"1px solid #141414", display:"flex", alignItems:"center", gap:"16px", flexShrink:0 }}>
