@@ -2249,6 +2249,8 @@ export default function Profess() {
   const [showPlayer, setShowPlayer] = useState(false);
   const ttsAudioRef = useRef(null);
   const speechStoppedRef = useRef(false);
+  const turnQueueRef = useRef([]);
+  const currentRoleRef = useRef("default");
   const [activePlaylist, setActivePlaylist] = useState(0);
   const [showMusicSuggest, setShowMusicSuggest] = useState(false);
   const [showDesktopMusicHint, setShowDesktopMusicHint] = useState(false);
@@ -2292,6 +2294,25 @@ export default function Profess() {
     .replace(/^---+$/gm, "").trim();
 
   const COACHING_RE = /^(COACHING|COACH|FEEDBACK|CATATAN|KOREKSI|ANALISIS|Giliran|Giliranmu|Sekarang giliran|Kamu yang|It's your turn|Your turn|Now it's)/i;
+
+  // Splits one raw API response into separate turns wherever a new [ROLE:...]
+  // tag block starts — e.g. Profess clarifying, then the character speaking.
+  // Each turn is rendered/spoken as its own message, in order, so the avatar
+  // and chat title only switch once that turn actually starts playing.
+  const splitTurns = (text) => {
+    const parts = text.split(/(?=\[ROLE:\w+\])/g).map(s => s.trim()).filter(Boolean);
+    return parts.length ? parts : [text];
+  };
+  const parseTurn = (raw) => ({
+    role: extractRole(raw) || "default",
+    mood: extractMood(raw) || "neutral",
+    modeTag: extractMode(raw) || "coaching",
+    inner: extractInner(raw),
+    charName: extractChar(raw),
+    charTitle: extractTitle(raw),
+    charGender: extractGender(raw),
+    clean: cleanText(raw),
+  });
 
   const parseSegments = (text) => {
     const segments = [];
@@ -2547,11 +2568,11 @@ export default function Profess() {
     };
   }, []);
 
-  const speakSegments = useCallback((segments, role, mood, inRole) => {
-    if (!speechEnabled) return;
+  const speakSegments = useCallback((segments, role, mood, inRole, onDone) => {
+    if (!speechEnabled) { if (onDone) onDone(); return; }
 
     const queue = segments.filter(s => s.text.trim());
-    if (!queue.length) return;
+    if (!queue.length) { if (onDone) onDone(); return; }
     speechStoppedRef.current = false;
 
     const voices = window.speechSynthesis?.getVoices() || [];
@@ -2625,7 +2646,7 @@ export default function Profess() {
 
     const playNext = () => {
       if (speechStoppedRef.current) { setIsSpeaking(false); stopTalking(); return; }
-      if (idx >= queue.length) { setIsSpeaking(false); stopTalking(); return; }
+      if (idx >= queue.length) { setIsSpeaking(false); stopTalking(); if (onDone) onDone(); return; }
       const seg = queue[idx++];
       const isStage = seg.type === 'stage';
       const isInner = seg.type === 'inner';
@@ -2644,15 +2665,15 @@ export default function Profess() {
     playNext();
   }, [speechEnabled, lang, getVoiceProfile]);
 
-  const speak = useCallback((text, role, mood, inRole, innerThought = null) => {
-    if (!speechEnabled) return;
+  const speak = useCallback((text, role, mood, inRole, innerThought = null, onDone) => {
+    if (!speechEnabled) { if (onDone) onDone(); return; }
     const segments = parseSegments(text);
-    if (!segments.length && !innerThought) return;
+    if (!segments.length && !innerThought) { if (onDone) onDone(); return; }
     // Add inner thought as final segment with special marker
     const allSegments = innerThought
       ? [...segments, { type: 'inner', text: innerThought }]
       : segments;
-    speakSegments(allSegments, role, mood, inRole);
+    speakSegments(allSegments, role, mood, inRole, onDone);
   }, [speechEnabled, speakSegments]);
 
   // Render markdown in text: bold, italic — returns array of spans
@@ -2715,8 +2736,9 @@ export default function Profess() {
   }, [isListening, isSpeaking]);
 
   const changeRoleAndMood = (newRole, newMood, newMode, charName, charTitle, charGender) => {
+    const prevRole = currentRoleRef.current;
     const newInRole = newMode === "dialog";
-    const roleChanged = newRole && newRole !== currentRole;
+    const roleChanged = newRole && newRole !== prevRole;
     if (roleChanged) {
       if (newRole !== "default" && !charCache[newRole]) {
         const generated = generateChar(newRole, charGender || null);
@@ -2731,20 +2753,66 @@ export default function Profess() {
           ...(charGender ? { gender: charGender, hairLong: charGender === "f" } : {}),
         }}));
       }
+      currentRoleRef.current = newRole;
       setIsTransitioning(true);
-      setTimeout(() => { setCurrentRole(newRole||currentRole); setCurrentMood(newMood||"neutral"); setIsInRole(newInRole); setIsTransitioning(false); }, 380);
+      setTimeout(() => { setCurrentRole(newRole||prevRole); setCurrentMood(newMood||"neutral"); setIsInRole(newInRole); setIsTransitioning(false); }, 380);
     } else {
       if (newMood) setCurrentMood(newMood);
       setIsInRole(newInRole);
-      if ((charName || charTitle || charGender) && currentRole !== "default") {
-        setCharCache(prev => ({ ...prev, [currentRole]: {
-          ...(prev[currentRole]||{}),
+      if ((charName || charTitle || charGender) && prevRole !== "default") {
+        setCharCache(prev => ({ ...prev, [prevRole]: {
+          ...(prev[prevRole]||{}),
           ...(charName ? { name: charName } : {}),
           ...(charTitle ? { title: charTitle } : {}),
           ...(charGender ? { gender: charGender, hairLong: charGender === "f" } : {}),
         }}));
       }
     }
+  };
+
+  // Plays one parsed turn (Profess clarifying, or the character speaking) as
+  // its own message: switches the avatar/role, appends the chat bubble, then
+  // speaks it. When its voice finishes (or immediately if voice is off), the
+  // next queued turn — if any — plays automatically, keeping the avatar swap
+  // in sync with which "speaker" is actually active instead of jumping ahead.
+  const pushTurn = (turn) => {
+    const { role, mood, modeTag, inner, charName, charTitle, charGender } = turn;
+    let clean = turn.clean;
+    const resolvedRole = (role === "default" && modeTag === "coaching" && currentRoleRef.current !== "default")
+      ? currentRoleRef.current : role;
+    changeRoleAndMood(resolvedRole, mood, modeTag, charName, charTitle, charGender);
+    const inRole = modeTag === "dialog";
+
+    if (clean.includes("[SUMMARY_START]")) {
+      const summaryMatch = clean.match(/\[SUMMARY_START\]([\s\S]*?)\[SUMMARY_END\]/);
+      if (summaryMatch) {
+        setSummary(summaryMatch[1].trim());
+        clean = clean.replace(/\[SUMMARY_START\][\s\S]*?\[SUMMARY_END\]/, "").trim();
+        setMessages(prev => [...prev, { role: "assistant", content: clean, inRole, inner }]);
+        speak(clean, role, mood, inRole, inner);
+        turnQueueRef.current = [];
+        setTimeout(() => setScreen("summary"), 1500);
+        return;
+      }
+    }
+
+    setMessages(prev => [...prev, { role: "assistant", content: clean, inRole, inner }]);
+    speak(clean, role, mood, inRole, inner, advanceTurnQueue);
+  };
+
+  const advanceTurnQueue = () => {
+    if (turnQueueRef.current.length > 0) {
+      const next = turnQueueRef.current.shift();
+      pushTurn(next);
+    }
+  };
+
+  // "Skip" while a turn is speaking: stop its voice and, if Profess and the
+  // character still have more queued turns, jump straight into the next one
+  // instead of silencing the whole exchange.
+  const skipSpeech = () => {
+    stopSpeech();
+    advanceTurnQueue();
   };
 
   const callAPI = async (msgs, mode, language, intensityLevel) => {
@@ -2776,15 +2844,10 @@ export default function Profess() {
         : baseMsg;
       const init = [{ role:"user", content:initMsg }];
       const text = await callAPI(init, mode, lang, intensity);
-      const role = extractRole(text)||"default", mood = extractMood(text)||"neutral", modeTag = extractMode(text)||"coaching";
-      const inner = extractInner(text);
-      const charName = extractChar(text);
-      const charTitle = extractTitle(text);
-      const charGender = extractGender(text);
-      changeRoleAndMood(role, mood, modeTag, charName, charTitle, charGender);
-      const clean = cleanText(text);
-      setMessages([{ role:"user", content:initMsg }, { role:"assistant", content:clean, inRole:modeTag==="dialog", inner }]);
-      speak(clean, role, mood, modeTag==="dialog", inner);
+      const turns = splitTurns(text).map(parseTurn);
+      setMessages([{ role:"user", content:initMsg }]);
+      turnQueueRef.current = turns.slice(1);
+      pushTurn(turns[0]);
     } catch(e) { setError("Connection failed. Please try again."); }
     finally { setLoading(false); }
   };
@@ -2792,37 +2855,15 @@ export default function Profess() {
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
     const msg = input.trim(); setInput(""); if(textareaRef.current) textareaRef.current.style.height="48px";
-    setError(null); stopSpeech();
+    setError(null); stopSpeech(); turnQueueRef.current = [];
     const newMsgs = [...messages, { role:"user", content:msg }]; setMessages(newMsgs); setLoading(true);
     // Store last user message for Try Again
     setLastExchange({ userMsg: msg, msgIndex: newMsgs.length - 1 });
     try {
       const text = await callAPI(newMsgs, sessionMode, lang, intensity);
-      const role = extractRole(text)||currentRole, mood = extractMood(text)||"neutral", modeTag = extractMode(text)||"coaching";
-      const inner = extractInner(text);
-      const charName = extractChar(text);
-      const charTitle = extractTitle(text);
-      const charGender = extractGender(text);
-      // Only switch to default if explicitly role:default — preserve current role during coaching
-      const resolvedRole = (role === "default" && modeTag === "coaching" && currentRole !== "default")
-        ? currentRole : role;
-      changeRoleAndMood(resolvedRole, mood, modeTag, charName, charTitle, charGender);
-      const clean = cleanText(text);
-      const inRole = modeTag==="dialog";
-      // Detect summary
-      if (clean.includes("[SUMMARY_START]")) {
-        const summaryMatch = clean.match(/\[SUMMARY_START\]([\s\S]*?)\[SUMMARY_END\]/);
-        if (summaryMatch) {
-          setSummary(summaryMatch[1].trim());
-          const withoutSummary = clean.replace(/\[SUMMARY_START\][\s\S]*?\[SUMMARY_END\]/, "").trim();
-          setMessages([...newMsgs, { role:"assistant", content:withoutSummary, inRole, inner }]);
-          speak(withoutSummary, role, mood, inRole);
-          setTimeout(() => setScreen("summary"), 1500);
-          return;
-        }
-      }
-      setMessages([...newMsgs, { role:"assistant", content:clean, inRole, inner }]);
-      speak(clean, role, mood, inRole, inner);
+      const turns = splitTurns(text).map(parseTurn);
+      turnQueueRef.current = turns.slice(1);
+      pushTurn(turns[0]);
     } catch(e) { setError("Something went wrong. Please try again."); }
     finally { setLoading(false); }
   };
@@ -2831,7 +2872,7 @@ export default function Profess() {
   const handleTA = (e) => { setInput(e.target.value); e.target.style.height="48px"; e.target.style.height=Math.min(e.target.scrollHeight,160)+"px"; };
   const tryAgain = () => {
     if (!lastExchange) return;
-    stopSpeech();
+    stopSpeech(); turnQueueRef.current = [];
     // Remove messages from lastExchange onwards and re-set input
     const trimmed = messages.slice(0, lastExchange.msgIndex);
     setMessages(trimmed);
@@ -2863,7 +2904,7 @@ export default function Profess() {
     setTimeout(() => document.getElementById("psend")?.click(), 50);
   };
 
-  const resetSession = () => { stopSpeech(); recognitionRef.current?.stop(); setScreen("lang"); setLang(null); setSessionMode(null); setPendingMode(null); setIntensity(null); setScenario(null); setSummary(null); setLastExchange(null); setMessages([]); setInput(""); setError(null); setCurrentRole("default"); setCurrentMood("neutral"); setIsInRole(false); setIsTransitioning(false); setIsListening(false); setMicError(null); setCharCache({}); setShowMusicSuggest(false); hasOpenedMusic.current = false; };
+  const resetSession = () => { stopSpeech(); turnQueueRef.current = []; currentRoleRef.current = "default"; recognitionRef.current?.stop(); setScreen("lang"); setLang(null); setSessionMode(null); setPendingMode(null); setIntensity(null); setScenario(null); setSummary(null); setLastExchange(null); setMessages([]); setInput(""); setError(null); setCurrentRole("default"); setCurrentMood("neutral"); setIsInRole(false); setIsTransitioning(false); setIsListening(false); setMicError(null); setCharCache({}); setShowMusicSuggest(false); hasOpenedMusic.current = false; };
 
   const displayRole = (isInRole || currentRole !== "default") ? currentRole : "default";
   const charMeta = displayRole === "default"
@@ -4576,7 +4617,7 @@ export default function Profess() {
           onFocus={e=>{ if(!isListening) e.target.style.borderColor="#242424"; }}
           onBlur={e=>{ if(!isListening) e.target.style.borderColor="#1A1A1A"; }}/>
         {isSpeaking && (
-          <button onClick={stopSpeech} style={{ background:"#0E0808", border:"1px solid #4A2828", color:"#7A4848", width:btnSz, height:btnSz, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"border-color .2s, color .2s" }}
+          <button onClick={skipSpeech} style={{ background:"#0E0808", border:"1px solid #4A2828", color:"#7A4848", width:btnSz, height:btnSz, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"border-color .2s, color .2s" }}
             onMouseEnter={e=>{ e.currentTarget.style.borderColor="#7A4848"; e.currentTarget.style.color="#BC7A7A"; }}
             onMouseLeave={e=>{ e.currentTarget.style.borderColor="#4A2828"; e.currentTarget.style.color="#7A4848"; }}>
             <IconStop/>
@@ -4684,7 +4725,7 @@ export default function Profess() {
             onMouseLeave={e=>{ e.currentTarget.style.borderColor="#1A1A1A"; }}>
             {isMobile ? <IconDesktop/> : <IconMobile/>}
           </button>
-          <button onClick={()=>{stopSpeech();setSpeechEnabled(p=>!p);}} style={{ background:"none", border:"1px solid #1A1A1A", color:speechEnabled?sessionAccent:"#1E1E1E", padding:"6px 8px", display:"flex", alignItems:"center", justifyContent:"center", transition:"border-color .2s" }}
+          <button onClick={()=>{stopSpeech();turnQueueRef.current=[];setSpeechEnabled(p=>!p);}} style={{ background:"none", border:"1px solid #1A1A1A", color:speechEnabled?sessionAccent:"#1E1E1E", padding:"6px 8px", display:"flex", alignItems:"center", justifyContent:"center", transition:"border-color .2s" }}
             onMouseEnter={e=>e.currentTarget.style.borderColor="#2A2520"}
             onMouseLeave={e=>e.currentTarget.style.borderColor="#1A1A1A"}>
             {speechEnabled ? <IconVolume/> : <IconMute/>}
