@@ -38,10 +38,12 @@ export default async function handler(req, res) {
     }
   }
 
-  // Fallback model used when the primary model's worker pool is saturated
-  // (503) or rate-limited (429) — NVIDIA NIM runs each model on a separate
-  // worker pool, so the fallback often has capacity even when the primary doesn't.
-  const FALLBACK_MODEL = "deepseek-ai/deepseek-v4-pro";
+  // deepseek-v4-pro is the default — z-ai/glm-5.1 has been frequently
+  // returning 503 (worker pool saturated), so it's now only used as a
+  // fallback rather than the primary model. NVIDIA_MODEL env override is
+  // intentionally ignored here so a stale env var can't force z-ai back in.
+  const PRIMARY_MODEL = "deepseek-ai/deepseek-v4-pro";
+  const FALLBACK_MODEL = "z-ai/glm-5.1";
 
   async function callNvidia(model, nvMessages) {
     const controller = new AbortController();
@@ -73,7 +75,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    let model = process.env.NVIDIA_MODEL || FALLBACK_MODEL;
+    let model = PRIMARY_MODEL;
 
     const nvMessages = [
       ...(system ? [{ role: "system", content: system }] : []),
