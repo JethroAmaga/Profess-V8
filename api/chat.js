@@ -38,14 +38,17 @@ export default async function handler(req, res) {
     }
   }
 
-  // Older/smaller fallback models (llama-3.1-8b, mistral-7b) were stable but
-  // didn't reliably follow the [ROLE]/[MODE]/[INNER] tag protocol, so the
-  // character dialog never actually switched mode/avatar. Back to
-  // deepseek/z-ai, which follow the tag protocol much better despite being
-  // more prone to 503/timeout. NVIDIA_MODEL env override is intentionally
-  // ignored here so a stale env var can't override this choice.
-  const PRIMARY_MODEL = "deepseek-ai/deepseek-v4-pro";
-  const FALLBACK_MODEL = "z-ai/glm-5.1";
+  // Middle ground: deepseek/z-ai follow the [ROLE]/[MODE]/[INNER] tag
+  // protocol well but are popular enough to hit 503/timeout constantly;
+  // llama-3.1-8b/mistral-7b were stable but too weak to follow the tag
+  // protocol at all. qwen2.5-7b-instruct is a smaller, less-trafficked
+  // model that's still noticeably better at instruction-following than
+  // llama-3.1-8b/mistral-7b, so it's the new primary. deepseek stays as
+  // fallback for when qwen's output quality isn't enough. NVIDIA_MODEL env
+  // override is intentionally ignored here so a stale env var can't
+  // override this choice.
+  const PRIMARY_MODEL = "qwen/qwen-2.5-7b-instruct";
+  const FALLBACK_MODEL = "deepseek-ai/deepseek-v4-pro";
 
   async function callNvidia(model, nvMessages) {
     const controller = new AbortController();
