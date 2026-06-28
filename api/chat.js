@@ -56,20 +56,16 @@ export default async function handler(req, res) {
     }
   }
 
-  try {
-    const model = process.env.NVIDIA_MODEL || "deepseek-ai/deepseek-v4-pro";
+  // Fallback model used when the primary model's worker pool is saturated
+  // (503) or rate-limited (429) — NVIDIA NIM runs each model on a separate
+  // worker pool, so the fallback often has capacity even when the primary doesn't.
+  const FALLBACK_MODEL = "deepseek-ai/deepseek-v4-pro";
 
-    const nvMessages = [
-      ...(system ? [{ role: "system", content: system }] : []),
-      ...messages,
-    ];
-
+  async function callNvidia(model, nvMessages) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 25000);
-
-    let response;
     try {
-      response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+      const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
         method: "POST",
         signal: controller.signal,
         headers: {
@@ -87,11 +83,29 @@ export default async function handler(req, res) {
           ...(model.includes("deepseek") ? { chat_template_kwargs: { thinking: false } } : {}),
         }),
       });
+      const data = await response.json();
+      return { response, data };
     } finally {
       clearTimeout(timeout);
     }
+  }
 
-    const data = await response.json();
+  try {
+    let model = process.env.NVIDIA_MODEL || FALLBACK_MODEL;
+
+    const nvMessages = [
+      ...(system ? [{ role: "system", content: system }] : []),
+      ...messages,
+    ];
+
+    let { response, data } = await callNvidia(model, nvMessages);
+
+    if (!response.ok && (response.status === 503 || response.status === 429) && model !== FALLBACK_MODEL) {
+      console.error(`NVIDIA ${model} unavailable (${response.status}), retrying with fallback model ${FALLBACK_MODEL}`);
+      model = FALLBACK_MODEL;
+      ({ response, data } = await callNvidia(model, nvMessages));
+    }
+
     if (!response.ok) {
       console.error("NVIDIA API error:", response.status, data);
       return res.status(response.status).json({ error: { message: "AI service unavailable" } });
