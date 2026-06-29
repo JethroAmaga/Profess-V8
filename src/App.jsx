@@ -2724,7 +2724,7 @@ export default function Profess() {
   // on the user's reply — a character would never talk like this about
   // themselves, so seeing this language is a strong signal that a turn is
   // coaching feedback even if the model forgot to re-emit [MODE:coaching].
-  const FEEDBACK_LANGUAGE_RE = /\b(you did (a|an)|you could (consider|try|ask)|you might (want|consider)|good job|great job|well done|next,? you|try to|consider (asking|saying|adding)|shows? that you|helps? to (break|create|build)|acknowledg(e|ing)|self-deprecating)\b/i;
+  const FEEDBACK_LANGUAGE_RE = /\b(you did (a|an)|you could (consider|try|ask|add|say|use)|you might (want|consider)|good job|great job|well done|nicely done|worked well|works? well|next,? you|try to|to build on (this|that)|consider (asking|saying|adding)|shows? that you|helps? to (break|create|build)|acknowledg(e|ing)|self-deprecating|show(s|ing)? (your|you'?re) interest|for example:|establishing a|your opening line|that strengthens|strengthens? the|builds? (rapport|trust|connection))\b/i;
 
   // Splits one raw API response into separate turns wherever a new [ROLE:...]
   // tag block starts — e.g. Profess clarifying, then the character speaking.
@@ -2862,7 +2862,7 @@ export default function Profess() {
   // (and the dialogue text doesn't get swallowed into the italic/muted beat).
   const INLINE_STAGE_SPLIT_RE = /\*([^*]+)\*/g;
 
-  const parseSegments = (text) => {
+  const parseSegments = (text, inRole = true) => {
     const segments = [];
     const lines = text.split('\n');
     let inCoaching = false;
@@ -2917,7 +2917,7 @@ export default function Profess() {
       // almost certainly dialogue the model just forgot to quote (a second,
       // third, ... beat in a row is extremely rare), so it must render as
       // normal dialog instead of being demoted to italic/small too.
-      if (!inCoaching && !dialogStarted && !usedLeadingNarrationPass && !/["“”]/.test(trimmed)) {
+      if (inRole && !inCoaching && !dialogStarted && !usedLeadingNarrationPass && !/["“”]/.test(trimmed)) {
         segments.push({ type: 'stage', text: fixNarrationPOV(trimmed) });
         usedLeadingNarrationPass = true;
         continue;
@@ -3238,7 +3238,7 @@ export default function Profess() {
 
   const speak = useCallback((text, role, mood, inRole, onDone) => {
     if (!speechEnabled) { if (onDone) onDone(); return; }
-    const segments = parseSegments(text);
+    const segments = parseSegments(text, inRole);
     if (!segments.length) { if (onDone) onDone(); return; }
     speakSegments(segments, role, mood, inRole, onDone);
   }, [speechEnabled, speakSegments]);
@@ -5263,7 +5263,7 @@ export default function Profess() {
     const mc = isA
       ? (msg.charSnapshot || (mInRole ? (charCache[currentRole]||CHARS.default) : (currentRole!=="default"?(charCache[currentRole]||CHARS.default):CHARS.default)))
       : CHARS.default;
-    const segments = isA ? parseSegments(msg.content) : null;
+    const segments = isA ? parseSegments(msg.content, mInRole) : null;
     return (
       <div key={i} className="msg-enter" style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
         <span style={{ fontSize:"9px", letterSpacing:".12em", textTransform:"uppercase", fontWeight:500, color:isA?(mInRole?mc.accent:"#C8A458"):"#2A2A2A" }}>
