@@ -3307,29 +3307,34 @@ export default function Profess() {
       // Three independent signals, since the model doesn't always tag its
       // own output consistently: an explicit [MODE:dialog] tag, a [CHAR:...]
       // tag / self-introduced "Name: "quote"" line (both surfaced via
-      // charName), or — the gap this closes — a bare name-only header line
-      // ("Luna" alone, then third-person narration) that has no colon/quote
-      // and so never trips the other two checks at all. Each line is
-      // stripped of markdown emphasis (**Emma**, __Emma__) before the
-      // name-only check, since the model sometimes bolds the header instead
-      // of leaving it plain — a leading "*" would otherwise break a regex
-      // anchored on a capital letter. Checked across every line in the
-      // chunk (not just the first), since an untagged intro like "Got it,
-      // let's begin." often sits ahead of the name line in the same chunk,
-      // and the name line must have further content after it (an actual
-      // header, not the chunk's last line) to count.
-      const firstRaw = (rawTurns[0] || "").trim();
+      // charName), or a bare name-only header line ("Luna" alone, then
+      // third-person narration) that has no colon/quote and so never trips
+      // the other two checks at all. Each line is stripped of markdown
+      // emphasis (**Emma**, __Emma__) before the name-only check, since the
+      // model sometimes bolds the header instead of leaving it plain — a
+      // leading "*" would otherwise break a regex anchored on a capital
+      // letter, and the name line must have further content after it (an
+      // actual header, not the chunk's last line) to count.
+      //
+      // Checked across EVERY turn the model produced in this first
+      // response, not just turns[0] — when the model leads with a properly
+      // tagged "Got it, let's begin." coaching ack, splitTurns gives that
+      // its own turn first, and the actual character/dialog turn (the one
+      // that matters here) ends up at turns[1] or later. Checking only
+      // index 0 let that second turn sail through unchecked.
       const NAME_ONLY_RE = /^[A-Z][A-Za-z.'-]+(?: [A-Z][A-Za-z.'-]+){0,2}$/;
-      const rawLines = firstRaw.split("\n");
-      const hasBareNameHeader = rawLines.some((line, i) => {
-        if (i === rawLines.length - 1) return false;
-        const stripped = line.trim().replace(/^[*_#\s]+|[*_:\s]+$/g, "");
-        return stripped && NAME_ONLY_RE.test(stripped);
-      });
-      const looksOffScript = !!turns[0] && (
-        turns[0].modeTag === "dialog" ||
-        !!turns[0].charName ||
-        hasBareNameHeader
+      const chunkHasBareNameHeader = (raw) => {
+        const lines = raw.trim().split("\n");
+        return lines.some((line, i) => {
+          if (i === lines.length - 1) return false;
+          const stripped = line.trim().replace(/^[*_#\s]+|[*_:\s]+$/g, "");
+          return stripped && NAME_ONLY_RE.test(stripped);
+        });
+      };
+      const looksOffScript = turns.some((t, i) =>
+        t.modeTag === "dialog" ||
+        !!t.charName ||
+        chunkHasBareNameHeader(rawTurns[i] || "")
       );
       if (looksOffScript) {
         const askWho = lang === "id"
