@@ -3281,12 +3281,15 @@ export default function Profess() {
       // tag / self-introduced "Name: "quote"" line (both surfaced via
       // charName), or — the gap this closes — a bare name-only header line
       // ("Luna" alone, then third-person narration) that has no colon/quote
-      // and so never trips the other two checks at all.
+      // and so never trips the other two checks at all. Checked with the
+      // multiline flag and not anchored to the very start of the chunk,
+      // since an untagged intro like "Got it, let's begin." often sits on
+      // the same unsplit chunk ahead of the name line.
       const firstRaw = (rawTurns[0] || "").trim();
       const looksOffScript = !!turns[0] && (
         turns[0].modeTag === "dialog" ||
         !!turns[0].charName ||
-        /^[A-Z][A-Za-z.'-]+(?: [A-Z][A-Za-z.'-]+){0,2}\s*\n/.test(firstRaw)
+        /^[A-Z][A-Za-z.'-]+(?: [A-Z][A-Za-z.'-]+){0,2}\s*\n/m.test(firstRaw)
       );
       if (looksOffScript) {
         const askWho = lang === "id"
