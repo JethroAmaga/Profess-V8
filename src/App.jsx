@@ -164,6 +164,7 @@ Rules for this turn:
 - The coaching line and the character's line are ALWAYS two separate tag blocks, never merged into one block of text.
 - Do NOT narrate "I'll now become the character" or "let me get into character" — that sentence does not exist in this format. Go directly from the one-line confirmation to the character's tag block and first line.
 - The confirmation block must be exactly one short sentence — nothing about the scenario, the character, or your approach. Save all of that for the character's own first line, said in-role.
+- [CHAR:name] MUST be the exact name the user gave you earlier in this conversation (e.g. "Her name is Claire" → [CHAR:Claire]) — re-read their answer if the name is buried inside a longer paragraph along with other details. Never substitute a different invented name, and never re-decide this only once: every later [CHAR:...] tag for this same character, in every later turn for the rest of the session, must keep using that exact same name — it does not drift or get replaced by a different name later in the conversation.
 
 After TURN 3, continue with the normal roleplay flow (stay in-role for 2-4 turns before stepping out to coach again). Every time you switch between coach and character within the SAME response, you MUST use this same two-block shape — never blend coach text and character dialog inside one tag block.
 
@@ -349,6 +350,7 @@ Rules for this turn:
 - The coaching line and the character's line are ALWAYS two separate tag blocks, never merged into one block of text.
 - Do NOT narrate "I'll now become the character" or "let me get into character" — that sentence does not exist in this format. Go directly from the one-line confirmation to the character's tag block and first line.
 - The confirmation block must be exactly one short sentence — nothing about the scenario, the character, or your approach. Save all of that for the character's own first line, said in-role.
+- [CHAR:name] MUST be the exact name the user gave you earlier in this conversation (e.g. "Her name is Claire" → [CHAR:Claire]) — re-read their answer if the name is buried inside a longer paragraph along with other details. Never substitute a different invented name, and never re-decide this only once: every later [CHAR:...] tag for this same character, in every later turn for the rest of the session, must keep using that exact same name — it does not drift or get replaced by a different name later in the conversation.
 - NEVER dump a character sheet (hair color, eye color, clothing, exact age, personality summary, backstory) in the confirmation line or anywhere else. Visual appearance is generated separately by the app — you never need to describe it in text. The user discovers who this person is through the conversation itself, not a profile read out before it starts.
 - The character's first line is a real opening moment — a short action/glance/greeting plus what they say, or just what they say — not a list of facts about them. For APPROACH scenarios, see the WHO SPEAKS FIRST rule above instead.
 
@@ -540,6 +542,7 @@ Aturan untuk giliran ini:
 - Baris coaching dan baris karakter SELALU dua blok tag terpisah, jangan pernah digabung jadi satu blok teks.
 - JANGAN menarasikan "sekarang saya akan menjadi karakter" atau semacamnya — kalimat seperti itu tidak ada dalam format ini. Langsung dari konfirmasi satu baris ke blok tag karakter dan dialog pertamanya.
 - Blok konfirmasi harus tepat satu kalimat singkat — jangan sebutkan skenario, karakter, atau pendekatanmu di sana. Semua itu disampaikan lewat baris pertama karakter sendiri, secara in-role.
+- [CHAR:nama] WAJIB nama yang PERSIS sama dengan yang diberikan user sebelumnya di percakapan ini (contoh: "Namanya Claire" → [CHAR:Claire]) — baca ulang jawaban user kalau namanya terselip di tengah paragraf panjang bersama detail lain. Jangan pernah mengganti dengan nama lain yang kamu karang, dan jangan hanya menentukan ini sekali saja: setiap tag [CHAR:...] untuk karakter yang sama di giliran-giliran berikutnya, sepanjang sisa sesi, harus tetap memakai nama yang sama persis — tidak boleh berubah-ubah di tengah jalan.
 
 Setelah TURN 3, lanjutkan alur roleplay normal (in-role 2-4 giliran sebelum keluar untuk coaching lagi). Setiap kali kamu beralih antara coach dan karakter dalam respons yang SAMA, kamu WAJIB memakai bentuk dua blok yang sama ini — jangan pernah mencampur teks coach dan dialog karakter dalam satu blok tag.
 
@@ -737,6 +740,7 @@ Aturan untuk giliran ini:
 - Baris coaching dan baris karakter SELALU dua blok tag terpisah, jangan pernah digabung jadi satu blok teks.
 - JANGAN menarasikan "sekarang saya akan menjadi karakter" atau semacamnya. Langsung dari konfirmasi satu baris ke blok tag karakter dan dialog pertamanya.
 - Blok konfirmasi harus tepat satu kalimat singkat — semua detail skenario/karakter disampaikan lewat baris pertama karakter sendiri, secara in-role.
+- [CHAR:nama] WAJIB nama yang PERSIS sama dengan yang diberikan user sebelumnya di percakapan ini (contoh: "Namanya Claire" → [CHAR:Claire]) — baca ulang jawaban user kalau namanya terselip di tengah paragraf panjang bersama detail lain. Jangan pernah mengganti dengan nama lain yang kamu karang, dan jangan hanya menentukan ini sekali saja: setiap tag [CHAR:...] untuk karakter yang sama di giliran-giliran berikutnya, sepanjang sisa sesi, harus tetap memakai nama yang sama persis — tidak boleh berubah-ubah di tengah jalan.
 - JANGAN PERNAH membuat "character sheet" (warna rambut, warna mata, baju, usia pasti, ringkasan kepribadian, latar belakang) di baris konfirmasi atau di manapun. Penampilan visual sudah dibuat otomatis oleh aplikasi — kamu tidak perlu mendeskripsikannya dalam teks. User mengenal orang ini lewat percakapan itu sendiri, bukan lewat profil yang dibacakan sebelum mulai.
 - Baris pertama karakter adalah momen pembuka yang nyata — aksi/lirikan/sapaan singkat plus ucapannya, atau cukup ucapannya saja — bukan daftar fakta tentang dirinya. KECUALI untuk skenario APPROACH (lihat ## SIAPA YANG BICARA DULU di bawah) — untuk skenario itu, baris karakter HANYA berisi satu beat aksi singkat dalam tanda bintang tunggal (misalnya *Nathan berdiri di dekat meja snack, melihat ke arahmu sambil tersenyum tipis.*), TANPA dialog/ucapan apapun — biarkan user yang membuka percakapan duluan.
 
@@ -2616,6 +2620,17 @@ export default function Profess() {
   const currentRoleRef = useRef("default");
   const isInRoleRef = useRef(false);
   const lastCharRoleRef = useRef("default"); // last role seen in MODE:dialog, untouched by coaching turns
+  // Locks the character's name to whatever the user actually typed during
+  // onboarding (e.g. "Her name is Claire"), so a weak-model name drift later
+  // in the session ("Claire" → "Emma") gets silently corrected back to the
+  // name the user gave, instead of trusting whatever [CHAR:...] the model
+  // emits turn to turn. Reset per session in startSession.
+  const canonCharNameRef = useRef(null);
+  const NAME_GIVEN_RE = /\b(?:her|his|their) name(?:'s| is)\s+([A-Z][a-zA-Z'-]+)|\bnamed\s+([A-Z][a-zA-Z'-]+)|\bnamanya\s+([A-Z][a-zA-Z'-]+)|\bnama(?:nya)?(?: dia| adalah)?\s+([A-Z][a-zA-Z'-]+)/i;
+  const extractGivenName = (text) => {
+    const m = text.match(NAME_GIVEN_RE);
+    return m ? (m[1] || m[2] || m[3] || m[4]) : null;
+  };
   const [activePlaylist, setActivePlaylist] = useState(0);
   const [showMusicSuggest, setShowMusicSuggest] = useState(false);
   const [showDesktopMusicHint, setShowDesktopMusicHint] = useState(false);
@@ -3214,6 +3229,19 @@ export default function Profess() {
         ? "Lanjutkan — silakan ucapkan kalimatmu."
         : "Go ahead — say your line.";
     }
+    // Name-drift correction: lock onto whichever name comes first — the
+    // name the user actually typed (captured in sendMessage), or failing
+    // that, whatever name the model itself first uses — then silently
+    // correct any later turn that drifts to a different invented name
+    // (e.g. "Claire" established, then the model later says "Emma").
+    let charNameFixed = charName;
+    if (inRole && charName) {
+      if (!canonCharNameRef.current) {
+        canonCharNameRef.current = charName;
+      } else if (charName.trim().toLowerCase() !== canonCharNameRef.current.trim().toLowerCase()) {
+        charNameFixed = canonCharNameRef.current;
+      }
+    }
     if (inRole && role) lastCharRoleRef.current = role;
 
     // Coaching turns must always render as Profess (default avatar), even
@@ -3221,13 +3249,13 @@ export default function Profess() {
     // pre-announce who's about to speak next — only an actual MODE:dialog
     // turn is allowed to switch the avatar to that character.
     const displayRole = inRole ? role : "default";
-    changeRoleAndMood(displayRole, mood, modeTag, inRole ? charName : null, inRole ? charTitle : null, inRole ? charGender : null);
+    changeRoleAndMood(displayRole, mood, modeTag, inRole ? charNameFixed : null, inRole ? charTitle : null, inRole ? charGender : null);
 
     // Snapshot which character this specific message belongs to at the
     // moment it's pushed, so the bubble label can't drift if currentRole/
     // charCache changes later (e.g. queued turns advancing, transition delay).
     const charSnapshot = inRole ? {
-      name: charName || (charCache[displayRole] && charCache[displayRole].name) || displayRole,
+      name: charNameFixed || (charCache[displayRole] && charCache[displayRole].name) || displayRole,
       title: charTitle || (charCache[displayRole] && charCache[displayRole].title) || ROLE_TITLES[displayRole] || displayRole,
       accent: (charCache[displayRole] && charCache[displayRole].accent) || CHARS.default.accent,
     } : null;
@@ -3286,6 +3314,7 @@ export default function Profess() {
 
   const startSession = async (mode, selectedScenario = null) => {
     setSessionMode(mode); setScreen("session"); setLoading(true); setError(null);
+    canonCharNameRef.current = null;
     try {
       const baseMsg = lang === "id" ? "Halo, saya ingin memulai sesi." : "Hello, I'd like to start a session.";
       const initMsg = selectedScenario
@@ -3357,6 +3386,13 @@ export default function Profess() {
     const newMsgs = [...messages, { role:"user", content:msg }]; setMessages(newMsgs); setLoading(true);
     // Store last user message for Try Again
     setLastExchange({ userMsg: msg, msgIndex: newMsgs.length - 1 });
+    // Capture the character's name as soon as the user states it (e.g.
+    // "Her name is Claire"), before the model gets a chance to invent or
+    // drift to a different one — see canonCharNameRef in pushTurn.
+    if (!canonCharNameRef.current) {
+      const givenName = extractGivenName(msg);
+      if (givenName) canonCharNameRef.current = givenName;
+    }
     try {
       const text = await callAPI(newMsgs, sessionMode, lang, intensity);
       const turns = mergeTurns(splitTurns(text).map(parseTurn));
