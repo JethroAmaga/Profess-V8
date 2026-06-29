@@ -69,8 +69,15 @@ export function containsBannedContent(text) {
 // trusted to prevent this, so independently check the model's OUTPUT for
 // substantial overlap with the system prompt it was given, regardless of why
 // the model produced it.
-const LEAK_CHUNK_LEN = 60;
-const LEAK_CHUNK_STRIDE = 30;
+// Chunk length must stay comfortably longer than the quoted example refusal
+// lines embedded in the prompt (the model is *meant* to say those verbatim,
+// e.g. "I don't think my perspective has changed. Let's continue discussing
+// your methodology." — under 90 chars) so intended output isn't flagged as a
+// leak of its own instructions. Real verbatim leaks are whole rule paragraphs,
+// far longer than any single instructed line, so raising the threshold still
+// catches those while clearing this false-positive class.
+const LEAK_CHUNK_LEN = 110;
+const LEAK_CHUNK_STRIDE = 55;
 
 function normalize(s) {
   return s.toLowerCase().replace(/\s+/g, " ");
