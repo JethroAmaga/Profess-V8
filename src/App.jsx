@@ -2766,7 +2766,7 @@ export default function Profess() {
     let role = taggedRole || introRoleKey || (isInRoleRef.current ? lastCharRoleRef.current : currentRoleRef.current);
     let modeTag = taggedMode || (introOnly ? "dialog" : (isInRoleRef.current ? "dialog" : "coaching"));
     let charName = taggedChar || (introOnly ? nameIntroMatch[1] : null);
-    const clean = fixNarrationPOV(cleanText(raw));
+    const clean = cleanText(raw);
 
     // Safety net: if the model drops back to giving feedback on the user's
     // reply without re-emitting [MODE:coaching], the untagged fallback above
@@ -2779,7 +2779,16 @@ export default function Profess() {
     if (!taggedMode && modeTag === "dialog") {
       const refName = canonCharNameRef.current || charName;
       const escaped = refName ? refName.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&") : "";
-      const selfThirdPerson = escaped && new RegExp(`\\b${escaped}\\b`, "i").test(clean);
+      // Only check the character's own QUOTED speech for self-naming — a
+      // character mentioning their own name inside third-person narration
+      // (e.g. "*Claire laughs softly...*") is completely normal and must
+      // not trip this safety net.
+      let selfThirdPerson = false;
+      if (escaped) {
+        const nameRe = new RegExp(`\\b${escaped}\\b`, "i");
+        const quoted = clean.match(/"(?:[^"\\]|\\.)*"|“[^”]*”/g) || [];
+        selfThirdPerson = quoted.some(q => nameRe.test(q));
+      }
       if (selfThirdPerson || FEEDBACK_LANGUAGE_RE.test(clean)) {
         role = "default";
         modeTag = "coaching";
@@ -2858,10 +2867,16 @@ export default function Profess() {
     const lines = text.split('\n');
     let inCoaching = false;
     let dialogStarted = false;
+    let usedLeadingNarrationPass = false;
     const pushChunk = (type, chunkText) => {
-      const t = chunkText.trim();
+      let t = chunkText.trim();
       if (!t) return;
       if (type === 'dialog') dialogStarted = true;
+      // POV fix only applies to narration ABOUT the character — never to
+      // actual dialog/coaching speech, where "me"/"my" are legitimately
+      // first person (Profess's own "Tell me..." or the character's own
+      // unquoted line) and must not be touched.
+      if (type === 'stage') t = fixNarrationPOV(t);
       const last = segments.length > 0 ? segments[segments.length-1] : null;
       if (last && last.type === type) {
         last.text += ' ' + t;
@@ -2896,15 +2911,15 @@ export default function Profess() {
       }
       // Safety net for the model forgetting to wrap a narration beat in
       // asterisks at all (e.g. "Claire looks up from her book..." sitting
-      // as its own line right before her quoted line). Only applies to a
-      // LEADING quote-free line before any dialogue has started in this
-      // turn — once dialogue is underway, a quote-free line is almost
-      // always just a continuation of the same quoted speech wrapping onto
-      // a new line (no quote mark on every line), not a new narration beat,
-      // so it must stay a normal dialog line instead of being demoted to
-      // italic/small.
-      if (!inCoaching && !dialogStarted && !/["“”]/.test(trimmed)) {
-        segments.push({ type: 'stage', text: trimmed });
+      // as its own line right before her quoted line). Only applies ONCE,
+      // to the single leading quote-free line before any dialogue has
+      // started in this turn — every later quote-free line/paragraph is
+      // almost certainly dialogue the model just forgot to quote (a second,
+      // third, ... beat in a row is extremely rare), so it must render as
+      // normal dialog instead of being demoted to italic/small too.
+      if (!inCoaching && !dialogStarted && !usedLeadingNarrationPass && !/["“”]/.test(trimmed)) {
+        segments.push({ type: 'stage', text: fixNarrationPOV(trimmed) });
+        usedLeadingNarrationPass = true;
         continue;
       }
       pushChunk(plainType, trimmed);
