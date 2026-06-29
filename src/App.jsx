@@ -2626,6 +2626,16 @@ export default function Profess() {
   // name the user gave, instead of trusting whatever [CHAR:...] the model
   // emits turn to turn. Reset per session in startSession.
   const canonCharNameRef = useRef(null);
+  // Gender lock: the weak model often forgets to re-emit [GENDER:...] on
+  // later turns, which would otherwise leave generateChar() to pick a
+  // random gender for that role's avatar — flipping a character who was
+  // already established as female into a male portrait mid-conversation.
+  // Lock onto the first gender we see (from the tag, or from the user's
+  // own onboarding pronouns below) and keep applying it on every later
+  // turn for this character. Reset per session in startSession.
+  const canonCharGenderRef = useRef(null);
+  const USER_PRONOUN_GENDER_RE = /\b(she|her|she's)\b/i;
+  const USER_PRONOUN_GENDER_M_RE = /\b(he|him|he's)\b/i;
   const NAME_GIVEN_RE = /\b(?:her|his|their) name(?:'s| is)\s+([A-Z][a-zA-Z'-]+)|\bnamed\s+([A-Z][a-zA-Z'-]+)|\bnamanya\s+([A-Z][a-zA-Z'-]+)|\bnama(?:nya)?(?: dia| adalah)?\s+([A-Z][a-zA-Z'-]+)/i;
   const extractGivenName = (text) => {
     const m = text.match(NAME_GIVEN_RE);
@@ -2745,15 +2755,34 @@ export default function Profess() {
     const merged = [];
     for (const t of turns) {
       const prev = merged[merged.length - 1];
-      if (prev && prev.role === t.role && prev.modeTag === t.modeTag && !t.clean.trim()) {
+      const samePair = prev && prev.role === t.role && prev.modeTag === t.modeTag;
+      if (samePair && !t.clean.trim()) {
         prev.charName = prev.charName || t.charName;
         prev.charTitle = prev.charTitle || t.charTitle;
         prev.charGender = prev.charGender || t.charGender;
-      } else if (prev && prev.role === t.role && prev.modeTag === t.modeTag && !prev.clean.trim()) {
+      } else if (samePair && !prev.clean.trim()) {
         t.charName = t.charName || prev.charName;
         t.charTitle = t.charTitle || prev.charTitle;
         t.charGender = t.charGender || prev.charGender;
         merged[merged.length - 1] = t;
+      } else if (samePair && t.modeTag === "coaching") {
+        // The weak model sometimes double-emits a separate coaching ack
+        // block back to back ("Let's begin." then "Got it, let's begin.")
+        // instead of writing one. Both are non-empty so the empty-text
+        // cases above don't catch this — collapse to just the later one,
+        // since TURN 3 is meant to be exactly one short confirmation line.
+        t.charName = t.charName || prev.charName;
+        t.charTitle = t.charTitle || prev.charTitle;
+        t.charGender = t.charGender || prev.charGender;
+        merged[merged.length - 1] = t;
+      } else if (samePair) {
+        // Same character continuing in a separate untagged block (e.g. a
+        // follow-up line after a stage-direction beat) — join as one turn
+        // instead of two separate bubbles.
+        prev.clean = `${prev.clean}\n\n${t.clean}`;
+        prev.charName = prev.charName || t.charName;
+        prev.charTitle = prev.charTitle || t.charTitle;
+        prev.charGender = prev.charGender || t.charGender;
       } else {
         merged.push({ ...t });
       }
@@ -2784,6 +2813,17 @@ export default function Profess() {
       const stageMatch = trimmed.match(STAGE_LINE_RE);
       if (stageMatch && !inCoaching) {
         segments.push({ type: 'stage', text: stageMatch[1].trim() });
+        continue;
+      }
+      // Safety net for the model forgetting to wrap a narration beat in
+      // asterisks (e.g. "Claire looks up from her book..." sitting as its
+      // own line right before her quoted line). A dialog line is supposed
+      // to be spoken aloud, but third-person narration has no quote marks
+      // at all — treat any quote-free line in a dialog turn as an unwrapped
+      // stage direction so it gets the same muted styling and TTS skip as
+      // a properly asterisk-wrapped beat, instead of being read aloud.
+      if (!inCoaching && !/["“”]/.test(trimmed)) {
+        segments.push({ type: 'stage', text: trimmed });
         continue;
       }
       const segType = inCoaching ? 'coaching' : 'dialog';
@@ -3244,12 +3284,25 @@ export default function Profess() {
     }
     if (inRole && role) lastCharRoleRef.current = role;
 
+    // Gender lock (see canonCharGenderRef above): trust the first gender we
+    // ever see for this character, then keep reapplying it even on turns
+    // where the model drops the [GENDER:...] tag, instead of letting
+    // generateChar() fall back to a coin-flip avatar.
+    let charGenderFixed = charGender;
+    if (inRole) {
+      if (!canonCharGenderRef.current && charGender) {
+        canonCharGenderRef.current = charGender;
+      } else if (!charGenderFixed && canonCharGenderRef.current) {
+        charGenderFixed = canonCharGenderRef.current;
+      }
+    }
+
     // Coaching turns must always render as Profess (default avatar), even
     // if the model already tagged this turn with the character's ROLE to
     // pre-announce who's about to speak next — only an actual MODE:dialog
     // turn is allowed to switch the avatar to that character.
     const displayRole = inRole ? role : "default";
-    changeRoleAndMood(displayRole, mood, modeTag, inRole ? charNameFixed : null, inRole ? charTitle : null, inRole ? charGender : null);
+    changeRoleAndMood(displayRole, mood, modeTag, inRole ? charNameFixed : null, inRole ? charTitle : null, inRole ? charGenderFixed : null);
 
     // Snapshot which character this specific message belongs to at the
     // moment it's pushed, so the bubble label can't drift if currentRole/
@@ -3315,6 +3368,7 @@ export default function Profess() {
   const startSession = async (mode, selectedScenario = null) => {
     setSessionMode(mode); setScreen("session"); setLoading(true); setError(null);
     canonCharNameRef.current = null;
+    canonCharGenderRef.current = null;
     try {
       const baseMsg = lang === "id" ? "Halo, saya ingin memulai sesi." : "Hello, I'd like to start a session.";
       const initMsg = selectedScenario
@@ -3392,6 +3446,14 @@ export default function Profess() {
     if (!canonCharNameRef.current) {
       const givenName = extractGivenName(msg);
       if (givenName) canonCharNameRef.current = givenName;
+    }
+    // Seed the gender lock from the user's own pronouns ("Her name is
+    // Claire... she's...") so the very first avatar render — before the
+    // model ever emits a [GENDER:...] tag — already gets the right gender
+    // instead of generateChar()'s random fallback.
+    if (!canonCharGenderRef.current) {
+      if (USER_PRONOUN_GENDER_RE.test(msg)) canonCharGenderRef.current = "f";
+      else if (USER_PRONOUN_GENDER_M_RE.test(msg)) canonCharGenderRef.current = "m";
     }
     try {
       const text = await callAPI(newMsgs, sessionMode, lang, intensity);
