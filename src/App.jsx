@@ -2774,6 +2774,15 @@ export default function Profess() {
     let role = taggedRole || introRoleKey || (isInRoleRef.current ? lastCharRoleRef.current : currentRoleRef.current);
     let modeTag = taggedMode || (introOnly ? "dialog" : (isInRoleRef.current ? "dialog" : "coaching"));
     let charName = taggedChar || (introOnly ? nameIntroMatch[1] : null);
+    // The spec only ever pairs [ROLE:default] with [MODE:coaching] — the model
+    // occasionally mistags an established character's dialog continuation as
+    // [ROLE:default] anyway (forgetting the character's real role key while
+    // still tagging [MODE:dialog]). Taken literally this snaps both the label
+    // and the avatar back to Profess mid-scene, so treat that combination as
+    // a model error and restore the character's last known role instead.
+    if (role === "default" && modeTag === "dialog" && lastCharRoleRef.current && lastCharRoleRef.current !== "default") {
+      role = lastCharRoleRef.current;
+    }
     const clean = cleanText(raw);
 
     // Safety net: if the model drops back to giving feedback on the user's
@@ -3442,7 +3451,15 @@ export default function Profess() {
       }
     }
 
-    setMessages(prev => [...prev, { role: "assistant", content: clean, inRole, charSnapshot }]);
+    // The USER_PRONOUN_RE rewrite above turns several different malformed
+    // model turns into this same fixed "say your line" prompt — if the model
+    // emits two such turns back to back, don't show the identical nudge
+    // twice in a row.
+    setMessages(prev => {
+      const last = prev[prev.length - 1];
+      if (last && last.role === "assistant" && last.content === clean && !inRole) return prev;
+      return [...prev, { role: "assistant", content: clean, inRole, charSnapshot }];
+    });
     speak(clean, role, mood, inRole, advanceTurnQueue);
   };
 
