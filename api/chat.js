@@ -2,7 +2,7 @@ import { isRateLimited, isForeignOrigin, containsBannedContent } from "./_securi
 
 const MAX_MESSAGES = 50;
 const MAX_CONTENT_CHARS = 6000;
-const MAX_SYSTEM_CHARS = 16000;
+const MAX_SYSTEM_CHARS = 24000;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
