@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     }
   }
 
-  const MODEL = "mistralai/ministral-14b-instruct-2512";
+  const MODEL = "qwen/qwen2.5-72b-instruct";
 
   const nimMessages = system ? [{ role: "system", content: system }, ...messages] : messages;
 
