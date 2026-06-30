@@ -1311,8 +1311,8 @@ const FlapCell = ({ target, delay, stepMs, flipDuration, mobileBoard }) => {
     };
   }, [target, delay, stepMs]);
 
-  const show = current === " " ? " " : current;
-  const showPrev = prev === " " ? " " : prev;
+  const show = current === " " ? " " : current;
+  const showPrev = prev === " " ? " " : prev;
   const cellTextStyle = { fontSize: mobileBoard ? "clamp(10px, 4.4vw, 20px)" : "clamp(7px, 1.8vw, 16px)", lineHeight:1, fontFamily:"'Manrope',monospace", fontWeight:700, letterSpacing:"0.03em" };
   const halfBase = { position:"absolute", insetInline:0, overflow:"hidden", background:"#181410", color:"#E9E5DC" };
   const textWrap = { position:"absolute", insetInline:0, display:"flex", alignItems:"center", justifyContent:"center", userSelect:"none", ...cellTextStyle };
@@ -1858,6 +1858,7 @@ export default function Profess() {
   const isInRoleRef = useRef(false);
   const lastCharRoleRef = useRef("default"); // last role seen in MODE:dialog, untouched by coaching turns
   const lastInRoleTurnRef = useRef(null); // snapshot of the last in-role turn, replayed by continueRoleplay()
+  const inputRef = useRef(""); // always-current input value for use inside stale callbacks
   // Locks the character's name to whatever the user actually typed during
   // onboarding (e.g. "Her name is Claire"), so a weak-model name drift later
   // in the session ("Claire" → "Emma") gets silently corrected back to the
@@ -2520,12 +2521,35 @@ export default function Profess() {
     if (isSpeaking) return;
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { setMicError("Speech recognition requires Chrome or Edge."); return; }
+    const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    const sendDelay = isMobile ? 600 : 300;
+    // Capture input at the moment mic is activated — used as prefix so existing
+    // text is preserved (Scenario C). If user deleted everything before activating,
+    // this will be "" and recognition starts fresh (Scenario B/A).
+    const prefix = inputRef.current.trim();
     const r = new SR(); r.continuous = true; r.interimResults = true; r.lang = lang === "id" ? "id-ID" : "en-US";
     let final = "";
+    let shouldRestart = false;
     r.onstart = () => setIsListening(true);
-    r.onresult = (e) => { let interim=""; final=""; for(let i=0;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript;else interim+=e.results[i][0].transcript;} setInput((final+interim).trim()); };
-    r.onerror = (e) => { setIsListening(false); if(e.error==="not-allowed")setMicError("Mic access denied."); else if(e.error!=="aborted")setMicError("Mic error: "+e.error); };
-    r.onend = () => { setIsListening(false); if(final.trim()) setTimeout(()=>document.getElementById("psend")?.click(),300); };
+    r.onresult = (e) => {
+      let interim=""; final="";
+      for(let i=0;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript;else interim+=e.results[i][0].transcript;}
+      const speech = (final||interim).trim();
+      setInput(speech ? (prefix ? prefix + " " + speech : speech) : prefix);
+    };
+    r.onerror = (e) => {
+      if (e.error === "not-allowed") { setIsListening(false); setMicError("Mic access denied."); }
+      else if (e.error === "no-speech") { shouldRestart = true; } // mobile drops connection on silence — restart silently
+      else if (e.error !== "aborted") { setIsListening(false); setMicError("Mic error: " + e.error); }
+    };
+    r.onend = () => {
+      if (shouldRestart && recognitionRef.current === r) {
+        shouldRestart = false;
+        try { r.start(); return; } catch { /* recognition already stopped */ }
+      }
+      setIsListening(false);
+      if (final.trim()) setTimeout(() => document.getElementById("psend")?.click(), sendDelay);
+    };
     recognitionRef.current = r; r.start();
   }, [isListening, isSpeaking]);
 
@@ -2791,7 +2815,7 @@ export default function Profess() {
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
-    const msg = input.trim(); setInput(""); if(textareaRef.current) textareaRef.current.style.height="48px";
+    const msg = input.trim(); setInput(""); inputRef.current = ""; if(textareaRef.current) textareaRef.current.style.height="48px";
     setError(null); stopSpeech(); turnQueueRef.current = [];
     const newMsgs = [...messages, { role:"user", content:msg }]; setMessages(newMsgs); setLoading(true);
     // Store last user message for Try Again
@@ -2821,7 +2845,7 @@ export default function Profess() {
   };
 
   const handleKeyDown = (e) => { if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();} };
-  const handleTA = (e) => { setInput(e.target.value); e.target.style.height="48px"; e.target.style.height=Math.min(e.target.scrollHeight,160)+"px"; };
+  const handleTA = (e) => { const v = e.target.value; setInput(v); inputRef.current = v; e.target.style.height="48px"; e.target.style.height=Math.min(e.target.scrollHeight,160)+"px"; };
   const tryAgain = () => {
     if (!lastExchange) return;
     stopSpeech(); turnQueueRef.current = [];
