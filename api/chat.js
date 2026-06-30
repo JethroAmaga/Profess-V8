@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     }
   }
 
-  const MODEL = "nvidia/llama-3.1-nemotron-70b-instruct";
+  const MODEL = "mistralai/mistral-large-2-instruct";
 
   const nimMessages = system ? [{ role: "system", content: system }, ...messages] : messages;
 
