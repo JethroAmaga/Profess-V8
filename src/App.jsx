@@ -1857,6 +1857,7 @@ export default function Profess() {
   const currentRoleRef = useRef("default");
   const isInRoleRef = useRef(false);
   const lastCharRoleRef = useRef("default"); // last role seen in MODE:dialog, untouched by coaching turns
+  const expectingResumeRef = useRef(false); // set by continueRoleplay(); forces next parsed turn to dialog+character
   // Locks the character's name to whatever the user actually typed during
   // onboarding (e.g. "Her name is Claire"), so a weak-model name drift later
   // in the session ("Claire" → "Emma") gets silently corrected back to the
@@ -2000,14 +2001,23 @@ export default function Profess() {
       ? (lastCharRoleRef.current !== "default" && lastCharRoleRef.current ? lastCharRoleRef.current
         : "char_" + nameIntroMatch[1].toLowerCase().replace(/[^a-z]+/g, "_"))
       : null;
-    let modeTag = taggedMode || (introOnly ? "dialog" : (isInRoleRef.current ? "dialog" : "coaching"));
+    // If continueRoleplay() was just called, the model's first response must be
+    // character dialog regardless of what tag it emits — clear the flag and override.
+    let forcedResume = false;
+    if (expectingResumeRef.current) {
+      expectingResumeRef.current = false;
+      forcedResume = true;
+    }
+    let modeTag = forcedResume ? "dialog" : (taggedMode || (introOnly ? "dialog" : (isInRoleRef.current ? "dialog" : "coaching")));
     // Resolve the untagged-role fallback from modeTag (which already accounts
     // for an explicit [MODE:dialog] tag), not from the stale isInRoleRef —
     // otherwise an untagged turn that follows a coaching interruption (which
     // left isInRoleRef false) keeps falling back to currentRoleRef ("default")
     // even though this turn is explicitly tagged back into dialog, stranding
     // the avatar/label on Profess after the character should have returned.
-    let role = taggedRole || introRoleKey || (modeTag === "dialog" ? lastCharRoleRef.current : currentRoleRef.current);
+    let role = forcedResume
+      ? (lastCharRoleRef.current && lastCharRoleRef.current !== "default" ? lastCharRoleRef.current : (taggedRole || currentRoleRef.current))
+      : (taggedRole || introRoleKey || (modeTag === "dialog" ? lastCharRoleRef.current : currentRoleRef.current));
     let charName = taggedChar || (introOnly ? nameIntroMatch[1] : null);
     // The spec only ever pairs [ROLE:default] with [MODE:coaching] — the model
     // occasionally mistags an established character's dialog continuation as
@@ -2854,6 +2864,7 @@ export default function Profess() {
   const continueRoleplay = () => {
     if (loading) return;
     // inCoachMode stays true until the character actually resumes (see useEffect below)
+    expectingResumeRef.current = true;
     const continueMsg = lang === "id"
       ? "(Lanjutkan roleplay-nya.)"
       : "(Continue the roleplay.)";
