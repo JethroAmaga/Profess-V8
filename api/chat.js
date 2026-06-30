@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     }
   }
 
-  const MODEL = "meta/llama-3.1-8b-instruct";
+  const MODEL = "meta/llama-3.3-70b-instruct";
 
   const nimMessages = system ? [{ role: "system", content: system }, ...messages] : messages;
 
