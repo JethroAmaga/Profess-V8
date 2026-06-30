@@ -202,7 +202,7 @@ const generateChar = (roleKey, forcedGender = null, forcedEthnicity = null) => {
   const hair = pick(HAIR[eth] || HAIR.white);
   // Hairstyle pool, kept gender-appropriate
   const hairStyle = gender === "f"
-    ? pick(["long","romantic_long","long_flowing","bun"])
+    ? pick(["long","romantic_long","long_flowing"])
     : pick(["short","buzz","quiff","messy","soft fringe","faux","bald"]);
   const hairLong = gender === "f";
   // Outfit variant — drives small collar/pattern accents in buildSVG
