@@ -2140,34 +2140,8 @@ export default function Profess() {
         continue;
       }
       const plainType = inCoaching ? 'coaching' : 'dialog';
-      if (!inCoaching && INLINE_STAGE_SPLIT_RE.test(trimmed)) {
-        // Walk the line in order, alternating plain text / *stage* chunks,
-        // so a beat fused onto the same line as dialogue still renders as
-        // two differently-styled pieces instead of one all-italic blob.
-        let lastIndex = 0;
-        INLINE_STAGE_SPLIT_RE.lastIndex = 0;
-        let m;
-        while ((m = INLINE_STAGE_SPLIT_RE.exec(trimmed))) {
-          pushChunk(plainType, trimmed.slice(lastIndex, m.index));
-          pushChunk('stage', m[1]);
-          lastIndex = m.index + m[0].length;
-        }
-        pushChunk(plainType, trimmed.slice(lastIndex));
-        continue;
-      }
-      // Safety net for the model forgetting to wrap a narration beat in
-      // asterisks at all (e.g. "Claire looks up from her book..." sitting
-      // as its own line right before her quoted line). Only applies ONCE,
-      // to the single leading quote-free line before any dialogue has
-      // started in this turn — every later quote-free line/paragraph is
-      // almost certainly dialogue the model just forgot to quote (a second,
-      // third, ... beat in a row is extremely rare), so it must render as
-      // normal dialog instead of being demoted to italic/small too.
-      if (inRole && !inCoaching && !dialogStarted && !usedLeadingNarrationPass && !/["“”]/.test(trimmed)) {
-        segments.push({ type: 'stage', text: fixNarrationPOV(trimmed) });
-        usedLeadingNarrationPass = true;
-        continue;
-      }
+      // Stage directions are not a supported feature — all non-coaching lines
+      // render as normal dialog regardless of asterisks or quote marks.
       pushChunk(plainType, trimmed);
     }
     return segments;
@@ -4536,11 +4510,6 @@ export default function Profess() {
               if (seg.type==="coaching") return (
                 <p key={si} style={{ fontSize:"13px", lineHeight:2, color:"6A6560", whiteSpace:"pre-wrap", fontStyle:"italic", paddingLeft:"16px" }}>
                   {renderMarkdown(seg.text)}
-                </p>
-              );
-              if (seg.type==="stage") return (
-                <p key={si} style={{ fontSize:"11px", lineHeight:1.7, color:"#6A6760", whiteSpace:"pre-wrap", fontStyle:"italic", paddingLeft:mInRole?"14px":"0" }}>
-                  {seg.text}
                 </p>
               );
               return (
