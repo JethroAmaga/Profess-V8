@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     }
   }
 
-  const MODEL = "qwen/qwen3.5-122b-a10b";
+  const MODEL = "qwen/qwen3-next-80b-a3b-instruct";
 
   const nimMessages = system ? [{ role: "system", content: system }, ...messages] : messages;
 
