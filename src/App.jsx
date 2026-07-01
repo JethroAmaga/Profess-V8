@@ -707,10 +707,7 @@ function buildSVG(charOrKey, mood, isTalking, scene = "role") {
       case "teman_ospek": case "new_acquaintance": case "neighbor": case "sibling":
       case "blind_date": case "stranger":
         if (scene === "livingroom") {
-        backProps = `
-          <rect x="8" y="108" width="144" height="14" rx="6" fill="#241A14" stroke="#2E2018" stroke-width="1.5"/>
-          <rect x="8" y="122" width="8" height="68" rx="3" fill="#1E1410"/>
-          <rect x="144" y="122" width="8" height="68" rx="3" fill="#1E1410"/>`;
+        backProps = ``;
         bodySVG = `<rect x="42" y="130" rx="14" width="76" height="90" fill="url(#outfitGrad)"/>
           <path d="M58 130 Q80 141 102 130" fill="none" stroke="#C890A0" stroke-width="2.5"/>
           ${outfitAccent(80,150,50)}
@@ -965,14 +962,127 @@ else {
 break;
         
       // ── Parent / grandparent / mentor — armchair ───────────────────────
-      case "parent": case "grandparent": case "mentor": case "senior":
-      case "pak_rt": case "calon_mertua": case "dosen_pembimbing":
+      // ── Ruang tamu rumah (orang tua, calon mertua, pak RT) ────────────────
+      case "parent": case "grandparent": case "calon_mertua": case "pak_rt":
         backProps = `
-          <rect x="5" y="104" width="150" height="16" rx="8" fill="#2A1C10"/>
-          <rect x="5" y="120" width="8" height="68" fill="#221508"/>
-          <rect x="147" y="120" width="8" height="68" fill="#221508"/>
-          <rect x="5" y="154" width="22" height="36" rx="6" fill="#2A1C10"/>
-          <rect x="133" y="154" width="22" height="36" rx="6" fill="#2A1C10"/>`;
+          <!-- Dinding ruang tamu — krem hangat -->
+          <rect x="0" y="0" width="160" height="240" fill="#E8DDD0"/>
+          <!-- Wainscoting / panel bawah -->
+          <rect x="0" y="140" width="160" height="100" fill="#DDD0C0"/>
+          <rect x="0" y="138" width="160" height="4"   fill="#C8BCAA"/>
+          <!-- Foto keluarga / lukisan di dinding -->
+          <rect x="10" y="14" width="48" height="36" rx="2" fill="#C8B898" stroke="#A89870" stroke-width="2"/>
+          <rect x="14" y="18" width="40" height="28" rx="1" fill="#D8C8A8"/>
+          <rect x="18" y="22" width="14" height="18" rx="6" fill="#B8A888" opacity=".6"/>
+          <rect x="36" y="24" width="12" height="16" rx="5" fill="#B8A888" opacity=".5"/>
+          <!-- Ornamen dinding kanan -->
+          <rect x="102" y="12" width="50" height="38" rx="2" fill="#C8B898" stroke="#A89870" stroke-width="2"/>
+          <rect x="106" y="16" width="42" height="30" rx="1" fill="#E8D8B8"/>
+          <ellipse cx="127" cy="31" rx="14" ry="11" fill="#B0A080" opacity=".4"/>
+          <!-- Rak kecil kiri -->
+          <rect x="0" y="80" width="22" height="4" fill="#A89068"/>
+          <rect x="2" y="56" width="7" height="24" rx="1" fill="#6A4830"/>
+          <rect x="10" y="60" width="6" height="20" rx="1" fill="#805840"/>
+          <rect x="2" y="68" width="18" height="12" rx="1" fill="#C8A870" opacity=".5"/>
+          <!-- Tanaman pot kiri bawah -->
+          <ellipse cx="12" cy="192" rx="10" ry="5" fill="#5A4020"/>
+          <ellipse cx="12" cy="188" rx="8"  ry="4" fill="#6A4820"/>
+          <circle cx="8"  cy="182" r="7" fill="#4A6830"/>
+          <circle cx="15" cy="178" r="6" fill="#5A7838"/>
+          <circle cx="10" cy="175" r="5" fill="#4A6830"/>`;
+        bodySVG = `<rect x="40" y="128" rx="10" width="80" height="92" fill="url(#outfitGrad)"/>
+          <path d="M58 128 Q80 137 102 128" fill="none" stroke="#5A7050" stroke-width="2"/>
+          ${armL}${armR}`;
+        frontProps = `
+          <rect x="5" y="186" width="150" height="20" rx="6" fill="#2A1C10"/>
+          <rect x="140" y="176" width="30" height="5" fill="#5A4020"/>
+          <rect x="152" y="181" width="4" height="14" fill="#3A2A14"/>
+          <ellipse cx="148" cy="174" rx="7" ry="3" fill="#C8A040" opacity=".7"/>
+          <rect x="143" y="172" width="10" height="4" rx="1" fill="#E8D0A0"/>`; break;
+
+      // ── Ruang kerja mentor/senior — semi-formal ───────────────────────────
+      case "mentor": case "senior":
+        backProps = `
+          <!-- Dinding hangat — nuansa kayu -->
+          <rect x="0" y="0" width="160" height="240" fill="#C8C0B0"/>
+          <!-- Panel kayu bawah -->
+          <rect x="0" y="130" width="160" height="110" fill="#B8ACA0"/>
+          <rect x="0" y="128" width="160" height="4"   fill="#A09488"/>
+          <!-- Jendela kiri -->
+          <rect x="6" y="8" width="50" height="70" rx="2" fill="#C8D8E0"/>
+          <rect x="6" y="8" width="50" height="70" rx="2" fill="none" stroke="#A09488" stroke-width="1.5"/>
+          <line x1="31" y1="8"  x2="31" y2="78" stroke="#A09488" stroke-width="1"/>
+          <line x1="6"  y1="43" x2="56" y2="43" stroke="#A09488" stroke-width="1"/>
+          <!-- Pemandangan hijau di luar jendela -->
+          <rect x="8"  y="10" width="46" height="66" fill="#A8C090" opacity=".4"/>
+          <circle cx="20" cy="30" r="14" fill="#7A9860" opacity=".5"/>
+          <circle cx="38" cy="26" r="12" fill="#8AAA68" opacity=".4"/>
+          <!-- Rak buku kanan -->
+          <rect x="110" y="0"  width="50" height="130" fill="#B0A898"/>
+          <rect x="110" y="0"  width="2"  height="130" fill="#A09888"/>
+          <rect x="110" y="40" width="50" height="3"   fill="#A09888"/>
+          <rect x="110" y="80" width="50" height="3"   fill="#A09888"/>
+          <!-- Buku -->
+          <rect x="112" y="6"  width="8" height="34" rx="1" fill="#4A6080"/>
+          <rect x="121" y="6"  width="6" height="34" rx="1" fill="#806040"/>
+          <rect x="128" y="6"  width="9" height="34" rx="1" fill="#406050"/>
+          <rect x="138" y="6"  width="7" height="34" rx="1" fill="#604080"/>
+          <rect x="146" y="6"  width="12" height="34" rx="1" fill="#805040"/>
+          <rect x="112" y="44" width="7" height="36" rx="1" fill="#407060"/>
+          <rect x="120" y="44" width="9" height="36" rx="1" fill="#804040"/>
+          <rect x="130" y="44" width="6" height="36" rx="1" fill="#408080"/>
+          <rect x="137" y="44" width="8" height="36" rx="1" fill="#606040"/>
+          <rect x="146" y="44" width="12" height="36" rx="1" fill="#6A4830"/>
+          <!-- Piala / penghargaan -->
+          <rect x="130" y="66" width="14" height="14" rx="1" fill="#C8A040" opacity=".7"/>
+          <rect x="133" y="60" width="8"  height="8"  rx="4" fill="#D4B050"/>`;
+        bodySVG = `<rect x="40" y="128" rx="10" width="80" height="92" fill="url(#outfitGrad)"/>
+          <path d="M58 128 Q80 137 102 128" fill="none" stroke="#5A7050" stroke-width="2"/>
+          ${armL}${armR}`;
+        frontProps = `
+          <rect x="5" y="186" width="150" height="20" rx="6" fill="#2A1C10"/>
+          <rect x="140" y="176" width="30" height="5" fill="#5A4020"/>
+          <rect x="152" y="181" width="4" height="14" fill="#3A2A14"/>
+          <ellipse cx="148" cy="174" rx="7" ry="3" fill="#C8A040" opacity=".7"/>
+          <rect x="143" y="172" width="10" height="4" rx="1" fill="#E8D0A0"/>`; break;
+
+      // ── Ruang dosen / akademik ────────────────────────────────────────────
+      case "dosen_pembimbing":
+        backProps = `
+          <!-- Dinding putih akademik -->
+          <rect x="0" y="0" width="160" height="240" fill="#E4E0D8"/>
+          <!-- Papan tulis / whiteboard -->
+          <rect x="4" y="6" width="100" height="64" rx="3" fill="#F5F2EC" stroke="#C0B8A8" stroke-width="1.5"/>
+          <!-- Tulisan di whiteboard -->
+          <line x1="10" y1="18" x2="70" y2="18" stroke="#2A4A8A" stroke-width="1.5" opacity=".5"/>
+          <line x1="10" y1="26" x2="58" y2="26" stroke="#2A4A8A" stroke-width="1"   opacity=".35"/>
+          <line x1="10" y1="33" x2="65" y2="33" stroke="#2A4A8A" stroke-width="1"   opacity=".3"/>
+          <!-- Diagram/rumus sederhana -->
+          <circle cx="82" cy="28" r="10" fill="none" stroke="#8A4A2A" stroke-width="1.2" opacity=".5"/>
+          <line x1="78" y1="28" x2="86" y2="28" stroke="#8A4A2A" stroke-width="1" opacity=".5"/>
+          <line x1="82" y1="24" x2="82" y2="32" stroke="#8A4A2A" stroke-width="1" opacity=".5"/>
+          <!-- Penghapus whiteboard -->
+          <rect x="90" y="66" width="14" height="4" rx="1" fill="#D8D0C0"/>
+          <!-- Rak kiri dinding -->
+          <rect x="0" y="0"  width="18" height="130" fill="#DAD4CC"/>
+          <rect x="18" y="0" width="1"  height="130" fill="#C8C0B8"/>
+          <rect x="0" y="38" width="18" height="2"   fill="#C8C0B8"/>
+          <rect x="0" y="76" width="18" height="2"   fill="#C8C0B8"/>
+          <rect x="1" y="4"  width="7" height="34" rx="1" fill="#4A5870"/>
+          <rect x="9" y="4"  width="7" height="34" rx="1" fill="#705040"/>
+          <rect x="1" y="40" width="9" height="36" rx="1" fill="#406050"/>
+          <rect x="11" y="40" width="5" height="36" rx="1" fill="#604060"/>
+          <rect x="1" y="78" width="6" height="22" rx="1" fill="#507040"/>
+          <rect x="8" y="78" width="8" height="22" rx="1" fill="#705850"/>
+          <!-- Kalender dinding -->
+          <rect x="110" y="6"  width="46" height="38" rx="2" fill="#fff" stroke="#C0B8A8" stroke-width="1"/>
+          <rect x="110" y="6"  width="46" height="10" rx="2" fill="#3A5080"/>
+          <line x1="120" y1="20" x2="152" y2="20" stroke="#D0C8C0" stroke-width=".8" opacity=".6"/>
+          <line x1="120" y1="27" x2="152" y2="27" stroke="#D0C8C0" stroke-width=".8" opacity=".6"/>
+          <line x1="120" y1="34" x2="152" y2="34" stroke="#D0C8C0" stroke-width=".8" opacity=".6"/>
+          <line x1="128" y1="16" x2="128" y2="42" stroke="#D0C8C0" stroke-width=".8" opacity=".4"/>
+          <line x1="136" y1="16" x2="136" y2="42" stroke="#D0C8C0" stroke-width=".8" opacity=".4"/>
+          <line x1="144" y1="16" x2="144" y2="42" stroke="#D0C8C0" stroke-width=".8" opacity=".4"/>`;
         bodySVG = `<rect x="40" y="128" rx="10" width="80" height="92" fill="url(#outfitGrad)"/>
           <path d="M58 128 Q80 137 102 128" fill="none" stroke="#5A7050" stroke-width="2"/>
           ${armL}${armR}`;
@@ -985,6 +1095,38 @@ break;
 
       // ── Standing with mic (journalist style) ──────────────────────────
       case "journalist": case "critic": case "media_audience":
+        backProps = `
+          <!-- Press conference room — dark blue-grey walls -->
+          <rect x="0" y="0" width="160" height="240" fill="#0E1420"/>
+          <!-- Back curtain/drape -->
+          <rect x="0" y="0" width="160" height="180" fill="#141C2C"/>
+          <!-- Vertical curtain folds -->
+          <line x1="20"  y1="0" x2="20"  y2="180" stroke="#0E1624" stroke-width="3" opacity=".6"/>
+          <line x1="40"  y1="0" x2="40"  y2="180" stroke="#0E1624" stroke-width="3" opacity=".6"/>
+          <line x1="60"  y1="0" x2="60"  y2="180" stroke="#0E1624" stroke-width="3" opacity=".6"/>
+          <line x1="80"  y1="0" x2="80"  y2="180" stroke="#0E1624" stroke-width="3" opacity=".6"/>
+          <line x1="100" y1="0" x2="100" y2="180" stroke="#0E1624" stroke-width="3" opacity=".6"/>
+          <line x1="120" y1="0" x2="120" y2="180" stroke="#0E1624" stroke-width="3" opacity=".6"/>
+          <line x1="140" y1="0" x2="140" y2="180" stroke="#0E1624" stroke-width="3" opacity=".6"/>
+          <!-- Logo banner/backdrop band -->
+          <rect x="0" y="58" width="160" height="28" fill="#1A2438" opacity=".9"/>
+          <rect x="0" y="58" width="160" height="2"  fill="#2A3A58"/>
+          <rect x="0" y="84" width="160" height="2"  fill="#2A3A58"/>
+          <!-- Repeated logo text placeholders -->
+          <rect x="6"  y="65" width="28" height="8" rx="2" fill="#2A3A58" opacity=".7"/>
+          <rect x="42" y="65" width="28" height="8" rx="2" fill="#2A3A58" opacity=".7"/>
+          <rect x="78" y="65" width="28" height="8" rx="2" fill="#2A3A58" opacity=".7"/>
+          <rect x="114" y="65" width="28" height="8" rx="2" fill="#2A3A58" opacity=".7"/>
+          <!-- Stage floor -->
+          <rect x="0" y="180" width="160" height="60" fill="#18202E"/>
+          <!-- Podium -->
+          <rect x="52" y="158" width="56" height="42" rx="3" fill="#1E2A3C"/>
+          <rect x="52" y="158" width="56" height="4"  rx="2" fill="#28384E"/>
+          <!-- Podium label plate -->
+          <rect x="62" y="168" width="36" height="10" rx="2" fill="#243248"/>
+          <!-- Spotlight glow from above -->
+          <ellipse cx="80" cy="0" rx="50" ry="20" fill="#A0C0FF" opacity=".04"/>
+          <ellipse cx="80" cy="120" rx="60" ry="80" fill="#A0B8FF" opacity=".03"/>`;
         bodySVG = `<rect x="40" y="128" rx="8" width="80" height="92" fill="url(#outfitGrad)"/>
           <path d="M40 178 h80 v28 a8 8 0 0 1 -8 8 h-64 a8 8 0 0 1 -8 -8 Z" fill="${darken(b,30)}"/>
           <rect x="88" y="138" rx="3" width="24" height="16" fill="#EAE0D0"/>
@@ -1000,7 +1142,36 @@ break;
 
       // ── Opponent — assertive pose ─────────────────────────────────────
       case "opponent":
-        backProps = `<rect x="20" y="100" width="120" height="10" rx="4" fill="#1E1814"/>`;
+        backProps = `
+          <!-- Debate hall — dark wood panelling -->
+          <rect x="0" y="0" width="160" height="240" fill="#0F0C08"/>
+          <!-- Rear wall -->
+          <rect x="0" y="0" width="160" height="185" fill="#17110C"/>
+          <!-- Wood panel horizontal bands -->
+          <rect x="0" y="30"  width="160" height="3" fill="#1E1610" opacity=".8"/>
+          <rect x="0" y="70"  width="160" height="3" fill="#1E1610" opacity=".8"/>
+          <rect x="0" y="110" width="160" height="3" fill="#1E1610" opacity=".8"/>
+          <rect x="0" y="150" width="160" height="3" fill="#1E1610" opacity=".8"/>
+          <!-- Panel vertical dividers -->
+          <rect x="0"   y="0" width="2" height="185" fill="#1E1610" opacity=".6"/>
+          <rect x="53"  y="0" width="2" height="185" fill="#1E1610" opacity=".6"/>
+          <rect x="105" y="0" width="2" height="185" fill="#1E1610" opacity=".6"/>
+          <rect x="158" y="0" width="2" height="185" fill="#1E1610" opacity=".6"/>
+          <!-- National/institutional emblem area -->
+          <circle cx="80" cy="55" r="22" fill="#1C1608" stroke="#2A2010" stroke-width="1.5"/>
+          <circle cx="80" cy="55" r="16" fill="none" stroke="#2A2010" stroke-width="1"/>
+          <circle cx="80" cy="55" r="6"  fill="#211A08"/>
+          <!-- Lectern/podium -->
+          <polygon points="48,185 112,185 118,240 42,240" fill="#1A1208"/>
+          <rect x="44" y="180" width="72" height="8" rx="2" fill="#22180C"/>
+          <rect x="48" y="162" width="64" height="22" rx="2" fill="#1E1608"/>
+          <rect x="52" y="166" width="56" height="12" rx="1" fill="#261C0C"/>
+          <!-- Gavel/water glass hint on lectern -->
+          <rect x="58" y="163" width="12" height="3" rx="1" fill="#2E2210" opacity=".7"/>
+          <!-- Floor -->
+          <rect x="0" y="185" width="160" height="55" fill="#120E08"/>
+          <!-- Floor highlight -->
+          <rect x="0" y="185" width="160" height="2" fill="#1E1810" opacity=".5"/>`;
         bodySVG = `<rect x="40" y="128" rx="8" width="80" height="92" fill="url(#outfitGrad)"/>
           <path d="M40 178 h80 v28 a8 8 0 0 1 -8 8 h-64 a8 8 0 0 1 -8 -8 Z" fill="${darken(b,30)}"/>
           <path d="M58 128 L80 150 L102 128 L94 128 L80 144 L66 128Z" fill="#1A120A"/>
@@ -2113,10 +2284,10 @@ export default function Profess() {
       aboutPanel: (() => { const r = pick(["interviewer","journalist","colleague","friend_female"]); return { char: generateChar(r), role: r }; })(),
       termsPanel: generateChar("judge"),
       heroRow: [
+        generateChar("journalist"),
+        generateChar("opponent"),
         generateChar("date"),
         generateChar("judge"),
-        generateChar("interviewer"),
-        generateChar("colleague"),
       ],
     };
   }
