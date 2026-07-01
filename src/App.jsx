@@ -2336,6 +2336,8 @@ export default function Profess() {
   // own onboarding pronouns below) and keep applying it on every later
   // turn for this character. Reset per session in startSession.
   const canonCharGenderRef = useRef(null);
+  // Set to true when model emits [SCENARIO:APPROACH] — clears once user sends first dialog line
+  const approachWaitingRef = useRef(false);
   const USER_PRONOUN_GENDER_RE = /\b(she|her|she's)\b/i;
   const USER_PRONOUN_GENDER_M_RE = /\b(he|him|he's)\b/i;
   const NAME_GIVEN_RE = /\b(?:her|his|their) name(?:'s| is)\s+([A-Z][a-zA-Z'-]+)|\bnamed\s+([A-Z][a-zA-Z'-]+)|\bnamanya\s+([A-Z][a-zA-Z'-]+)|\bnama(?:nya)?(?: dia| adalah)?\s+([A-Z][a-zA-Z'-]+)/i;
@@ -2378,6 +2380,7 @@ export default function Profess() {
   const extractRole = (t) => (t.match(/\[ROLE:\s*(\w+)\]/) || [])[1] || null;
   const extractMood = (t) => (t.match(/\[MOOD:\s*(\w+)\]/) || [])[1] || null;
   const extractMode = (t) => (t.match(/\[MODE:\s*(\w+)\]/) || [])[1] || null;
+  const extractScenarioTag = (t) => /\[SCENARIO:\s*APPROACH\]/i.test(t);
   const CHAR_BLACKLIST = /^(siapa|who|seseorang|someone|entah|unknown|nama|name)$/i;
   const extractChar = (t) => { const m = t.match(/\[CHAR:\s*([^\]]+)\]/); return m ? (CHAR_BLACKLIST.test(m[1].trim()) ? null : m[1].trim()) : null; };
   const extractTitle = (t) => { const m = t.match(/\[TITLE:\s*([^\]]+)\]/); return m ? m[1].trim() : null; };
@@ -2474,7 +2477,8 @@ export default function Profess() {
     // even though this turn is explicitly tagged back into dialog, stranding
     // the avatar/label on Profess after the character should have returned.
     let role = taggedRole || introRoleKey || (modeTag === "dialog" ? lastCharRoleRef.current : currentRoleRef.current);
-    let charName = taggedChar || (introOnly ? nameIntroMatch[1] : null);
+    const introName = introOnly ? nameIntroMatch[1] : null;
+    let charName = taggedChar || (introName && !CHAR_BLACKLIST.test(introName.trim()) ? introName : null);
     // The spec only ever pairs [ROLE:default] with [MODE:coaching] — the model
     // occasionally mistags an established character's dialog continuation as
     // [ROLE:default] anyway (forgetting the character's real role key while
@@ -3204,6 +3208,7 @@ export default function Profess() {
 
   const startSession = async (mode, selectedScenario = null) => {
     setSessionMode(mode); setScreen("session"); setLoading(true); setError(null);
+    approachWaitingRef.current = false;
     canonCharNameRef.current = null;
     canonCharGenderRef.current = null;
     // A role key like "crush" is reused across every session of that
@@ -3256,7 +3261,7 @@ export default function Profess() {
         return lines.some((line, i) => {
           if (i === lines.length - 1) return false;
           const stripped = line.trim().replace(/^[*_#\s]+|[*_:\s]+$/g, "");
-          return stripped && NAME_ONLY_RE.test(stripped);
+          return stripped && NAME_ONLY_RE.test(stripped) && !CHAR_BLACKLIST.test(stripped);
         });
       };
       const looksOffScript = turns.some((t, i) =>
@@ -3300,9 +3305,31 @@ export default function Profess() {
       if (USER_PRONOUN_GENDER_RE.test(msg)) canonCharGenderRef.current = "f";
       else if (USER_PRONOUN_GENDER_M_RE.test(msg)) canonCharGenderRef.current = "m";
     }
+    // If approachWaitingRef was set from the previous response, this is the
+    // user's first real dialog line — character may now respond freely.
+    const wasApproachWaiting = approachWaitingRef.current;
+    if (wasApproachWaiting) approachWaitingRef.current = false;
+
     try {
       const text = await callAPI(newMsgs, sessionMode, lang, intensity);
-      const turns = mergeTurns(splitTurns(text).map(parseTurn));
+      // Detect [SCENARIO:APPROACH] in the raw response — if found, set the flag
+      // so next user message knows character should have been silent this turn.
+      const isApproach = extractScenarioTag(text);
+      if (isApproach) approachWaitingRef.current = true;
+      let turns = mergeTurns(splitTurns(text).map(parseTurn));
+      // Code-level enforcement: if model tagged APPROACH, strip all quoted speech
+      // from dialog turns in this response so character cannot speak before user.
+      if (isApproach) {
+        turns = turns.map(t => {
+          if (t.modeTag !== "dialog") return t;
+          // Remove anything inside quotes (straight and curly) — keep stage directions
+          const stripped = t.clean
+            .replace(/["""][^"""]*["""]/g, "")
+            .replace(/["'][^"']{2,}["']/g, "")
+            .trim();
+          return { ...t, clean: stripped };
+        });
+      }
       turnQueueRef.current = turns.slice(1);
       pushTurn(turns[0]);
     } catch(e) { setError("Something went wrong. Please try again."); }
@@ -3354,7 +3381,7 @@ export default function Profess() {
     pushTurn(lastInRoleTurnRef.current);
   };
 
-  const resetSession = () => { stopSpeech(); turnQueueRef.current = []; currentRoleRef.current = "default"; recognitionRef.current?.stop(); setScreen("lang"); setLang(null); setSessionMode(null); setPendingMode(null); setIntensity(null); setScenario(null); setSummary(null); setLastExchange(null); setMessages([]); setInput(""); setError(null); setCurrentRole("default"); setCurrentMood("neutral"); setIsInRole(false); setIsTransitioning(false); setIsListening(false); setMicError(null); setCharCache({}); setShowMusicSuggest(false); hasOpenedMusic.current = false; setInCoachMode(false); };
+  const resetSession = () => { stopSpeech(); turnQueueRef.current = []; approachWaitingRef.current = false; currentRoleRef.current = "default"; recognitionRef.current?.stop(); setScreen("lang"); setLang(null); setSessionMode(null); setPendingMode(null); setIntensity(null); setScenario(null); setSummary(null); setLastExchange(null); setMessages([]); setInput(""); setError(null); setCurrentRole("default"); setCurrentMood("neutral"); setIsInRole(false); setIsTransitioning(false); setIsListening(false); setMicError(null); setCharCache({}); setShowMusicSuggest(false); hasOpenedMusic.current = false; setInCoachMode(false); };
 
   const displayRole = (isInRole || currentRole !== "default") ? currentRole : "default";
   const charMeta = displayRole === "default"
