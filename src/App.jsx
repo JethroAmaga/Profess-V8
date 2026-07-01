@@ -1775,8 +1775,8 @@ const FlapCell = ({ target, delay, stepMs, flipDuration, mobileBoard }) => {
     };
   }, [target, delay, stepMs]);
 
-  const show = current === " " ? " " : current;
-  const showPrev = prev === " " ? " " : prev;
+  const show = current === " " ? " " : current;
+  const showPrev = prev === " " ? " " : prev;
   const cellTextStyle = { fontSize: mobileBoard ? "clamp(10px, 4.4vw, 20px)" : "clamp(7px, 1.8vw, 16px)", lineHeight:1, fontFamily:"'Manrope',monospace", fontWeight:700, letterSpacing:"0.03em" };
   const halfBase = { position:"absolute", insetInline:0, overflow:"hidden", background:"#181410", color:"#E9E5DC" };
   const textWrap = { position:"absolute", insetInline:0, display:"flex", alignItems:"center", justifyContent:"center", userSelect:"none", ...cellTextStyle };
@@ -2342,7 +2342,8 @@ export default function Profess() {
   const NAME_GIVEN_RE = /\b(?:her|his|their) name(?:'s| is)\s+([A-Z][a-zA-Z'-]+)|\bnamed\s+([A-Z][a-zA-Z'-]+)|\bnamanya\s+([A-Z][a-zA-Z'-]+)|\bnama(?:nya)?(?: dia| adalah)?\s+([A-Z][a-zA-Z'-]+)/i;
   const extractGivenName = (text) => {
     const m = text.match(NAME_GIVEN_RE);
-    return m ? (m[1] || m[2] || m[3] || m[4]) : null;
+    const n = m ? (m[1] || m[2] || m[3] || m[4]) : null;
+    return n && !/^(siapa|who)$/i.test(n.trim()) ? n : null;
   };
   const [activePlaylist, setActivePlaylist] = useState(0);
   const [showMusicSuggest, setShowMusicSuggest] = useState(false);
