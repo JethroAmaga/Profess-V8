@@ -58,7 +58,7 @@ const ROLE_TITLES = {
   investor:"Investor", acquirer:"Acquisition Lead", reviewer:"Peer Reviewer",
   panelist:"Panelist",
   // Formal — Adversarial
-  opponent:"Opposition Speaker", prosecutor:"Prosecutor",
+  opponent:"Opposition Speaker", government_speaker:"Government Speaker", prosecutor:"Prosecutor",
   defense_lawyer:"Defense Lawyer", cross_examiner:"Cross-Examiner",
   critic:"Critic", investigator:"Investigator",
   // Formal — Authoritative
