@@ -86,6 +86,8 @@ const ROLE_TITLES = {
   date:"Date", blind_date:"Blind Date", host:"Host",
   guest:"Guest", fellow_passenger:"Fellow Passenger",
   customer_service:"Customer Service",
+  bookstore_stranger:"Bookstore", golf_partner:"Golf Partner",
+  padel_partner:"Padel Partner",
   // Indonesia kontekstual
   pak_rt:"Pak RT", dosen_pembimbing:"Dosen Pembimbing",
   calon_mertua:"Calon Mertua", senior_organisasi:"Senior Organisasi",
@@ -168,8 +170,11 @@ const NAME_POOL = {
   blind_date:       N("Her","Him","Her","Him","Ella","Él","Her","Him","Her","Him","Her","Him","Dia","Dia"),
   host:             N("Rachel","Tom","Eva","Jonas","Paula","Felipe","Amina","Kwesi","Sunita","Kiran","Mia","Jason","Dina","Dimas"),
   guest:            N("Rachel","Tom","Eva","Jonas","Paula","Felipe","Amina","Kwesi","Sunita","Kiran","Mia","Jason","Dina","Dimas"),
-  fellow_passenger: N("A woman","A man","A woman","A man","A woman","A man","A woman","A man","A woman","A man","A woman","A man","Seseorang","Seseorang"),
-  customer_service: N("Sarah","James","Claire","Thomas","Isabella","Carlos","Amara","Marcus","Priya","Arjun","Mei","Wei","Siti","Budi"),
+  fellow_passenger:  N("A woman","A man","A woman","A man","A woman","A man","A woman","A man","A woman","A man","A woman","A man","Seseorang","Seseorang"),
+  customer_service:  N("Sarah","James","Claire","Thomas","Isabella","Carlos","Amara","Marcus","Priya","Arjun","Mei","Wei","Siti","Budi"),
+  bookstore_stranger:N("A woman","A man","A woman","A man","A woman","A man","A woman","A man","A woman","A man","A woman","A man","Seseorang","Seseorang"),
+  golf_partner:      N("A woman","A man","A woman","A man","A woman","A man","A woman","A man","A woman","A man","A woman","A man","Seseorang","Seseorang"),
+  padel_partner:     N("A woman","A man","A woman","A man","A woman","A man","A woman","A man","A woman","A man","A woman","A man","Seseorang","Seseorang"),
   // Indonesia kontekstual
   pak_rt:           N("Bu RT","Pak RT","Bu RT","Pak RT","Bu RT","Pak RT","Bu RT","Pak RT","Bu RT","Pak RT","Bu RT","Pak RT","Bu RT","Pak RT"),
   dosen_pembimbing: N("Prof. Wijaya","Prof. Santoso","Prof. Wijaya","Prof. Santoso","Prof. Wijaya","Prof. Santoso","Prof. Wijaya","Prof. Santoso","Prof. Wijaya","Prof. Santoso","Prof. Wijaya","Prof. Santoso","Prof. Wijaya","Prof. Santoso"),
@@ -913,6 +918,210 @@ break;
           ${outfitAccent(80,150,55)}
           ${armL}${armR}`; break;
 
+      // ── Golf partner — fairway + club ─────────────────────────────────
+      case "golf_partner":
+        backProps = `
+          <!-- Sky -->
+          <rect x="0" y="0" width="160" height="185" fill="#0A1A0E"/>
+          <!-- Distant hills -->
+          <ellipse cx="30"  cy="175" rx="60" ry="20" fill="#142A14"/>
+          <ellipse cx="110" cy="178" rx="70" ry="18" fill="#162C16"/>
+          <ellipse cx="80"  cy="172" rx="90" ry="16" fill="#1A3018"/>
+          <!-- Fairway -->
+          <rect x="0" y="185" width="160" height="55" fill="#2E4A2E"/>
+          <!-- Mowed stripes -->
+          <rect x="0"   y="185" width="20" height="55" fill="#355535" opacity=".5"/>
+          <rect x="40"  y="185" width="20" height="55" fill="#355535" opacity=".5"/>
+          <rect x="80"  y="185" width="20" height="55" fill="#355535" opacity=".5"/>
+          <rect x="120" y="185" width="20" height="55" fill="#355535" opacity=".5"/>
+          <!-- Flag pin -->
+          <line x1="128" y1="130" x2="128" y2="185" stroke="#8A8078" stroke-width="1.5"/>
+          <polygon points="128,130 140,136 128,142" fill="#C84040"/>
+          <!-- Hole -->
+          <ellipse cx="128" cy="186" rx="5" ry="2" fill="#0A1408" opacity=".7"/>`;
+        bodySVG = `<rect x="42" y="130" rx="12" width="76" height="90" fill="url(#outfitGrad)"/>
+          <path d="M60 130 Q80 142 100 130" fill="none" stroke="${darken(b,10)}" stroke-width="1.5"/>
+          ${outfitAccent(80,150,50)}
+          ${armL}${armR}`;
+        frontProps = `
+          <!-- Golf club grip at left hand -->
+          <rect x="20" y="186" width="12" height="5" fill="#1A1A1A" rx="2"/>
+          <!-- Shaft from left hand to ground -->
+          <line x1="26" y1="189" x2="88" y2="236" stroke="#C8C0B0" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Club head (iron) -->
+          <rect x="83" y="232" width="14" height="7" fill="#B0A898" rx="2"/>
+          <rect x="83" y="235" width="14" height="2" fill="#888070" opacity=".8"/>
+          ${legsFeetSVG}`;
+        hideLegs = true; break;
+
+      // ── Padel partner — court + racket ────────────────────────────────
+      case "padel_partner":
+        backProps = `
+          <!-- Court wall -->
+          <rect x="0" y="0" width="160" height="170" fill="#0E1828" opacity=".95"/>
+          <!-- Glass reflection strips -->
+          <rect x="0" y="0" width="4" height="170" fill="#fff" opacity=".04"/>
+          <rect x="8" y="0" width="2" height="170" fill="#fff" opacity=".02"/>
+          <!-- Court back lines -->
+          <line x1="0"   y1="138" x2="160" y2="138" stroke="#fff" stroke-width="1.5" opacity=".25"/>
+          <line x1="80"  y1="0"   x2="80"  y2="138" stroke="#fff" stroke-width="1"   opacity=".15"/>
+          <!-- Net post + net -->
+          <rect x="78" y="115" width="4" height="23" fill="#8A8A7A"/>
+          <rect x="0"  y="133" width="160" height="3" fill="#C8C8B8" opacity=".6"/>
+          <!-- Court floor -->
+          <rect x="0" y="170" width="160" height="70" fill="#1A2A4A"/>
+          <!-- Floor lines -->
+          <line x1="0"  y1="192" x2="160" y2="192" stroke="#fff" stroke-width="1"  opacity=".2"/>
+          <line x1="80" y1="170" x2="80"  y2="240" stroke="#fff" stroke-width=".8" opacity=".15"/>
+          <!-- Padel ball on ground -->
+          <circle cx="118" cy="222" r="5" fill="#C8D840"/>
+          <path d="M114 220 Q118 218 122 220" stroke="#A0B020" stroke-width=".8" fill="none"/>`;
+        bodySVG = `<rect x="42" y="130" rx="12" width="76" height="90" fill="url(#outfitGrad)"/>
+          <path d="M60 130 Q80 142 100 130" fill="none" stroke="${darken(b,10)}" stroke-width="1.5"/>
+          ${outfitAccent(80,150,50)}
+          ${armL}${armR}`;
+        frontProps = `
+          <!-- Padel racket — handle connects into oval head seamlessly -->
+          <!-- Handle -->
+          <rect x="124" y="168" width="9" height="28" fill="#4A3020" rx="3" transform="rotate(-20 128 182)"/>
+          <!-- Grip wrap marks -->
+          <rect x="124" y="174" width="9" height="3" fill="#2A1A10" opacity=".6" transform="rotate(-20 128 182)"/>
+          <rect x="124" y="179" width="9" height="3" fill="#2A1A10" opacity=".6" transform="rotate(-20 128 182)"/>
+          <!-- Racket neck (bridge between handle and head) -->
+          <rect x="124" y="158" width="9" height="14" fill="#3A3A3A" rx="2" transform="rotate(-20 128 165)"/>
+          <!-- Racket head oval — centred at handle top after rotation -->
+          <ellipse cx="122" cy="138" rx="20" ry="24" fill="#2A2A2A" transform="rotate(-20 122 138)"/>
+          <ellipse cx="122" cy="138" rx="20" ry="24" fill="none" stroke="#5A5A5A" stroke-width="3" transform="rotate(-20 122 138)"/>
+          <!-- Hole pattern -->
+          <circle cx="116" cy="130" r="2.5" fill="#2A3A5A" opacity=".8" transform="rotate(-20 122 138)"/>
+          <circle cx="124" cy="126" r="2.5" fill="#2A3A5A" opacity=".8" transform="rotate(-20 122 138)"/>
+          <circle cx="130" cy="133" r="2.5" fill="#2A3A5A" opacity=".8" transform="rotate(-20 122 138)"/>
+          <circle cx="114" cy="138" r="2.5" fill="#2A3A5A" opacity=".8" transform="rotate(-20 122 138)"/>
+          <circle cx="122" cy="136" r="2.5" fill="#2A3A5A" opacity=".8" transform="rotate(-20 122 138)"/>
+          <circle cx="128" cy="143" r="2.5" fill="#2A3A5A" opacity=".8" transform="rotate(-20 122 138)"/>
+          <circle cx="118" cy="146" r="2.5" fill="#2A3A5A" opacity=".8" transform="rotate(-20 122 138)"/>
+          <!-- Brand line -->
+          <line x1="114" y1="138" x2="130" y2="138" stroke="#C8A458" stroke-width=".8" opacity=".5" transform="rotate(-20 122 138)"/>
+          ${legsFeetSVG}`;
+        hideLegs = true; break;
+
+      // ── Bookstore stranger — bookshelf background ──────────────────────
+      case "bookstore_stranger":
+        backProps = `
+          <!-- Shelf background -->
+          <rect x="0" y="0" width="160" height="240" fill="#1A1208"/>
+          <!-- Shelf planks -->
+          <rect x="0" y="60"  width="160" height="7" fill="#5C3A1A"/>
+          <rect x="0" y="122" width="160" height="7" fill="#5C3A1A"/>
+          <rect x="0" y="184" width="160" height="7" fill="#4E3015"/>
+          <!-- Shelf shadows -->
+          <rect x="0" y="67"  width="160" height="3" fill="#000" opacity=".3"/>
+          <rect x="0" y="129" width="160" height="3" fill="#000" opacity=".3"/>
+          <!-- Top shelf books (behind character head area) -->
+          <rect x="0"   y="12" width="9"  height="48" fill="#8B2020" rx="1"/>
+          <rect x="10"  y="16" width="7"  height="44" fill="#1A3A6A" rx="1"/>
+          <rect x="18"  y="10" width="10" height="50" fill="#2A6A2A" rx="1"/>
+          <rect x="29"  y="14" width="8"  height="46" fill="#6A4A1A" rx="1"/>
+          <rect x="100" y="13" width="8"  height="47" fill="#5A1A6A" rx="1"/>
+          <rect x="109" y="10" width="10" height="50" fill="#6A2A10" rx="1"/>
+          <rect x="120" y="15" width="7"  height="45" fill="#1A5A5A" rx="1"/>
+          <rect x="128" y="12" width="9"  height="48" fill="#4A4A1A" rx="1"/>
+          <rect x="138" y="10" width="8"  height="50" fill="#7A2A2A" rx="1"/>
+          <rect x="147" y="14" width="13" height="46" fill="#1A4A6A" rx="1"/>
+          <!-- Mid shelf books -->
+          <rect x="0"   y="72" width="11" height="50" fill="#2A5A8A" rx="1"/>
+          <rect x="12"  y="76" width="8"  height="46" fill="#8A5A20" rx="1"/>
+          <rect x="21"  y="70" width="12" height="52" fill="#3A7A3A" rx="1"/>
+          <rect x="34"  y="74" width="7"  height="48" fill="#7A2A4A" rx="1"/>
+          <rect x="98"  y="72" width="9"  height="50" fill="#1A6A4A" rx="1"/>
+          <rect x="108" y="70" width="11" height="52" fill="#5A3A7A" rx="1"/>
+          <rect x="120" y="75" width="8"  height="47" fill="#7A5A10" rx="1"/>
+          <rect x="129" y="71" width="10" height="51" fill="#4A1A1A" rx="1"/>
+          <rect x="140" y="73" width="8"  height="49" fill="#1A3A5A" rx="1"/>
+          <rect x="149" y="70" width="11" height="52" fill="#6A6A1A" rx="1"/>
+          <!-- Warm amber overlay -->
+          <rect x="0" y="0" width="160" height="240" fill="#C8A458" opacity=".04"/>`;
+        bodySVG = `<rect x="42" y="130" rx="12" width="76" height="90" fill="url(#outfitGrad)"/>
+          <path d="M60 130 Q80 142 100 130" fill="none" stroke="${darken(b,10)}" stroke-width="1.5"/>
+          ${outfitAccent(80,150,50)}
+          ${armL}${armR}`;
+        frontProps = `
+          <!-- Book held in right hand -->
+          <rect x="114" y="170" width="18" height="24" fill="#C8A458" rx="2"/>
+          <rect x="115" y="171" width="16" height="22" fill="#1A1208" rx="1"/>
+          <line x1="117" y1="174" x2="129" y2="174" stroke="#C8A458" stroke-width=".8" opacity=".5"/>
+          <line x1="117" y1="178" x2="129" y2="178" stroke="#C8A458" stroke-width=".8" opacity=".5"/>
+          <line x1="117" y1="182" x2="125" y2="182" stroke="#C8A458" stroke-width=".8" opacity=".5"/>
+          ${legsFeetSVG}`;
+        hideLegs = true; break;
+
+      // ── Fellow passenger — bus/train seat interior ─────────────────────
+      case "fellow_passenger":
+        backProps = `
+          <!-- Bus interior ceiling + overhead rack -->
+          <rect x="0" y="0" width="160" height="240" fill="#0A0C10"/>
+          <rect x="60" y="0" width="100" height="14" fill="#1E2430" rx="2"/>
+          <rect x="63" y="14" width="94" height="3" fill="#262E3C"/>
+          <!-- Rack bars -->
+          <line x1="80"  y1="0" x2="80"  y2="14" stroke="#2A3040" stroke-width="1.5"/>
+          <line x1="110" y1="0" x2="110" y2="14" stroke="#2A3040" stroke-width="1.5"/>
+          <line x1="140" y1="0" x2="140" y2="14" stroke="#2A3040" stroke-width="1.5"/>
+          <!-- Bag in rack -->
+          <rect x="66" y="3" width="28" height="10" fill="#3A2A1A" rx="2"/>
+          <!-- Night window (left) -->
+          <rect x="0" y="18" width="58" height="100" fill="#060E18" rx="3"/>
+          <rect x="0" y="18" width="58" height="3"   fill="#1A2030"/>
+          <rect x="0" y="115" width="58" height="3"  fill="#1A2030"/>
+          <rect x="55" y="18" width="3" height="100" fill="#1A2030"/>
+          <rect x="26" y="18" width="3" height="100" fill="#1A2030"/>
+          <!-- Night city lights through window -->
+          <circle cx="8"  cy="48"  r="1.2" fill="#C8D870" opacity=".55"/>
+          <circle cx="16" cy="62"  r="1"   fill="#C8D870" opacity=".4"/>
+          <circle cx="7"  cy="78"  r="1.5" fill="#E8B830" opacity=".45"/>
+          <circle cx="20" cy="40"  r=".8"  fill="#fff"    opacity=".3"/>
+          <circle cx="38" cy="54"  r="1.2" fill="#C8D870" opacity=".45"/>
+          <circle cx="48" cy="70"  r="1"   fill="#E8B830" opacity=".4"/>
+          <circle cx="35" cy="36"  r=".8"  fill="#fff"    opacity=".3"/>
+          <circle cx="50" cy="44"  r="1"   fill="#C8D870" opacity=".35"/>
+          <!-- Hill silhouette -->
+          <ellipse cx="20"  cy="118" rx="28" ry="10" fill="#0A1018"/>
+          <ellipse cx="48"  cy="116" rx="22" ry="8"  fill="#0C1218"/>
+          <!-- Reading light glow -->
+          <ellipse cx="94" cy="17" rx="6" ry="3" fill="#C8A458" opacity=".15"/>
+          <circle  cx="94" cy="17" r="2.5" fill="#C8A458" opacity=".4"/>
+          <!-- Seat back behind character -->
+          <rect x="8" y="118" width="144" height="122" fill="#1E2838" rx="6"/>
+          <rect x="8" y="118" width="144" height="22"  fill="#2E3848" rx="6"/>
+          <rect x="44" y="120" width="72" height="18"  fill="#323A4A" rx="3"/>
+          <!-- Armrests -->
+          <rect x="8"   y="168" width="18" height="30" fill="#242C3A" rx="4"/>
+          <rect x="134" y="168" width="18" height="30" fill="#242C3A" rx="4"/>`;
+        bodySVG = `
+          <!-- Seated torso (slightly shorter, sitting against backrest) -->
+          <rect x="44" y="136" rx="12" width="72" height="56" fill="url(#outfitGrad)"/>
+          <path d="M60 136 Q80 148 100 136" fill="none" stroke="${darken(b,10)}" stroke-width="1.5"/>
+          ${outfitAccent(80,152,40)}
+          ${armLNoHand}${armRNoHand}`;
+        frontProps = `
+          <!-- Seat cushion over legs -->
+          <rect x="8" y="188" width="144" height="16" fill="#1A2230" rx="4"/>
+          <!-- Thighs on seat -->
+          <rect x="54" y="188" width="22" height="28" fill="${darken(b,18)}" rx="4"/>
+          <rect x="84" y="188" width="22" height="28" fill="${darken(b,18)}" rx="4"/>
+          <!-- Lower legs hanging -->
+          <rect x="58" y="212" width="14" height="20" fill="${darken(b,22)}" rx="3"/>
+          <rect x="88" y="212" width="14" height="20" fill="${darken(b,22)}" rx="3"/>
+          <!-- Shoes -->
+          <ellipse cx="66"  cy="232" rx="14" ry="6" fill="${darken(b,30)}"/>
+          <ellipse cx="96"  cy="232" rx="14" ry="6" fill="${darken(b,30)}"/>
+          <!-- Hands relaxed on lap -->
+          ${handL}${handR}
+          <!-- Phone in right hand -->
+          <rect x="122" y="162" width="14" height="22" fill="#1A1A1A" rx="3"/>
+          <rect x="123" y="163" width="12" height="20" fill="#0A1A2A" rx="2"/>
+          <rect x="125" y="165" width="8"  height="5"  fill="#2A4A6A" opacity=".6" rx="1"/>`;
+        hideLegs = true; break;
+
       // ── Default social/casual ─────────────────────────────────────────
       default:
         backProps = `<rect x="20" y="100" width="120" height="10" rx="4" fill="#1E1814"/>`;
@@ -1064,6 +1273,7 @@ const PLAYLISTS = [
 // project; markers are plain glowing points, no images, theme fixed dark). ──
 const GLOBE_EARTH_TEXTURE = "https://unpkg.com/three-globe@2.31.0/example/img/earth-blue-marble.jpg";
 const GLOBE_BUMP_TEXTURE = "https://unpkg.com/three-globe@2.31.0/example/img/earth-topology.png";
+
 
 function globeLatLngToVector3(lat, lng, radius) {
   const phi = (90 - lat) * (Math.PI / 180);
@@ -1811,10 +2021,10 @@ export default function Profess() {
       aboutPanel: (() => { const r = pick(["interviewer","journalist","colleague","friend_female"]); return { char: generateChar(r), role: r }; })(),
       termsPanel: generateChar("judge"),
       heroRow: [
-        generateChar("interviewer"),
-        generateChar("colleague"),
-        generateChar("crush"),
-        generateChar("negotiator"),
+        generateChar("golf_partner"),
+        generateChar("padel_partner"),
+        generateChar("bookstore_stranger"),
+        generateChar("fellow_passenger"),
       ],
     };
   }
@@ -3941,7 +4151,7 @@ export default function Profess() {
 )}
 
   {heroRow.map((charObj, i) => {
-    const role = ["interviewer","colleague","crush","negotiator"][i];
+    const role = ["golf_partner","padel_partner","bookstore_stranger","fellow_passenger"][i];
     const svg = heroSvgs[i];
 
     return (
@@ -4366,13 +4576,13 @@ export default function Profess() {
           { group:"Relasi", items:["Reuni Teman Lama — Ada yang Belum Selesai","Ketemu Crush — Kesempatan yang Tidak Bisa Diulang","Kenalan Baru di Acara — Tidak Ada yang Dikenal","Minta Maaf ke Teman — Sudah Terlalu Lama Didiamkan","Konfrontasi Teman — Sebelum Hubungan Ini Berakhir"] },
           { group:"Keluarga", items:["Bicara Jujur ke Orang Tua — Tentang Masa Depan","Ketemu Calon Mertua — Pertama Kali","Adik yang Tidak Mau Diatur — Tapi Kamu Peduli"] },
           { group:"Profesional Casual", items:["Ngobrol dengan Senior di Kantor — Yang Kamu Kagumi","Mengkritik Atasan dengan Sopan — Tanpa Kehilangan Posisi","Networking di Acara — Mulai dari Nol"] },
-          { group:"Situasional", items:["Kenalan di Bookstore — Buku yang Sama","Perjalanan Panjang — Teman Duduk yang Menarik","Golf dengan Pengusaha Senior — Empat Jam untuk Berkesan"] },
+          { group:"Situasional", items:["Kenalan di Bookstore — Buku yang Sama","Perjalanan Panjang — Teman Duduk yang Menarik","Golf dengan Pengusaha Senior — Empat Jam untuk Berkesan","Networking di Padel — Rekan Baru di Court"] },
         ],
         en: [
           { group:"Relationships", items:["Reconnecting with an Old Friend — Something Was Left Unsaid","Meeting Your Crush — A Chance You Can't Repeat","New People at an Event — You Don't Know Anyone","Apologizing to a Friend — You've Waited Too Long","Confronting a Friend — Before This Ends"] },
           { group:"Family", items:["Honest Talk with Parents — About Your Future","Meeting the Parents — First Time","A Sibling Who Won't Listen — But You Care"] },
           { group:"Professional Casual", items:["Talking to a Senior You Admire — At the Office","Giving Feedback to Your Boss — Without Losing Ground","Networking at an Event — Starting From Zero"] },
-          { group:"Situational", items:["Bookstore Encounter — The Same Book","Long Journey — An Interesting Seatmate","Golf with a Senior Executive — Four Hours to Make an Impression"] },
+          { group:"Situational", items:["Bookstore Encounter — The Same Book","Long Journey — An Interesting Seatmate","Golf with a Senior Executive — Four Hours to Make an Impression","Padel Networking — A New Connection on the Court"] },
         ],
       },
     };
