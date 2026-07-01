@@ -1775,8 +1775,8 @@ const FlapCell = ({ target, delay, stepMs, flipDuration, mobileBoard }) => {
     };
   }, [target, delay, stepMs]);
 
-  const show = current === " " ? " " : current;
-  const showPrev = prev === " " ? " " : prev;
+  const show = current === " " ? " " : current;
+  const showPrev = prev === " " ? " " : prev;
   const cellTextStyle = { fontSize: mobileBoard ? "clamp(10px, 4.4vw, 20px)" : "clamp(7px, 1.8vw, 16px)", lineHeight:1, fontFamily:"'Manrope',monospace", fontWeight:700, letterSpacing:"0.03em" };
   const halfBase = { position:"absolute", insetInline:0, overflow:"hidden", background:"#181410", color:"#E9E5DC" };
   const textWrap = { position:"absolute", insetInline:0, display:"flex", alignItems:"center", justifyContent:"center", userSelect:"none", ...cellTextStyle };
@@ -3315,12 +3315,13 @@ export default function Profess() {
     try {
       const text = await callAPI(newMsgs, sessionMode, lang, intensity);
       let turns = mergeTurns(splitTurns(text).map(parseTurn));
-      // Social mode: user always opens first. If isInRoleRef is still false,
-      // the model has not entered dialog yet — strip any character speech so
-      // the user gets the opening line. Formal mode allows the character to
-      // open (e.g. Government side in a debate, interviewer in a job interview).
-      const isFirstDialogInSocial = sessionMode === "social" && !isInRoleRef.current;
-      if (isFirstDialogInSocial && turns.some(t => t.modeTag === "dialog")) {
+      // User always opens first. Exception: if the user's first message is a
+      // yield phrase ("go ahead", "silakan mulai", etc.), skip stripping so the
+      // character can legitimately open (e.g. Government in a debate).
+      const YIELD_RE = /^\s*(go ahead|you (go |start|open)|please (open|begin|start)|silakan (mulai|buka|bicara|mulai duluan)|mulai (duluan|dulu|saja)|buka duluan|you first|open for)\b/i;
+      const userYields = YIELD_RE.test(msg);
+      const isFirstDialog = !isInRoleRef.current && !userYields;
+      if (isFirstDialog && turns.some(t => t.modeTag === "dialog")) {
         turns = turns.map(t => {
           if (t.modeTag !== "dialog") return t;
           const stageOnly = t.clean
