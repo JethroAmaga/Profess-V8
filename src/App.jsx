@@ -1775,8 +1775,8 @@ const FlapCell = ({ target, delay, stepMs, flipDuration, mobileBoard }) => {
     };
   }, [target, delay, stepMs]);
 
-  const show = current === " " ? " " : current;
-  const showPrev = prev === " " ? " " : prev;
+  const show = current === " " ? " " : current;
+  const showPrev = prev === " " ? " " : prev;
   const cellTextStyle = { fontSize: mobileBoard ? "clamp(10px, 4.4vw, 20px)" : "clamp(7px, 1.8vw, 16px)", lineHeight:1, fontFamily:"'Manrope',monospace", fontWeight:700, letterSpacing:"0.03em" };
   const halfBase = { position:"absolute", insetInline:0, overflow:"hidden", background:"#181410", color:"#E9E5DC" };
   const textWrap = { position:"absolute", insetInline:0, display:"flex", alignItems:"center", justifyContent:"center", userSelect:"none", ...cellTextStyle };
@@ -2337,8 +2337,6 @@ export default function Profess() {
   // own onboarding pronouns below) and keep applying it on every later
   // turn for this character. Reset per session in startSession.
   const canonCharGenderRef = useRef(null);
-  // Set to true when model emits [SCENARIO:APPROACH] — clears once user sends first dialog line
-  const approachWaitingRef = useRef(false);
   const USER_PRONOUN_GENDER_RE = /\b(she|her|she's)\b/i;
   const USER_PRONOUN_GENDER_M_RE = /\b(he|him|he's)\b/i;
   const NAME_GIVEN_RE = /\b(?:her|his|their) name(?:'s| is)\s+([A-Z][a-zA-Z'-]+)|\bnamed\s+([A-Z][a-zA-Z'-]+)|\bnamanya\s+([A-Z][a-zA-Z'-]+)|\bnama(?:nya)?(?: dia| adalah)?\s+([A-Z][a-zA-Z'-]+)/i;
@@ -2381,7 +2379,6 @@ export default function Profess() {
   const extractRole = (t) => (t.match(/\[ROLE:\s*(\w+)\]/) || [])[1] || null;
   const extractMood = (t) => (t.match(/\[MOOD:\s*(\w+)\]/) || [])[1] || null;
   const extractMode = (t) => (t.match(/\[MODE:\s*(\w+)\]/) || [])[1] || null;
-  const extractScenarioTag = (t) => /\[SCENARIO:\s*APPROACH\]/i.test(t);
   const CHAR_BLACKLIST = /^(siapa|who|seseorang|someone|entah|unknown|nama|name)$/i;
   const extractChar = (t) => { const m = t.match(/\[CHAR:\s*([^\]]+)\]/); return m ? (CHAR_BLACKLIST.test(m[1].trim()) ? null : m[1].trim()) : null; };
   const extractTitle = (t) => { const m = t.match(/\[TITLE:\s*([^\]]+)\]/); return m ? m[1].trim() : null; };
@@ -3209,7 +3206,6 @@ export default function Profess() {
 
   const startSession = async (mode, selectedScenario = null) => {
     setSessionMode(mode); setScreen("session"); setLoading(true); setError(null);
-    approachWaitingRef.current = false;
     canonCharNameRef.current = null;
     canonCharGenderRef.current = null;
     // A role key like "crush" is reused across every session of that
@@ -3306,29 +3302,23 @@ export default function Profess() {
       if (USER_PRONOUN_GENDER_RE.test(msg)) canonCharGenderRef.current = "f";
       else if (USER_PRONOUN_GENDER_M_RE.test(msg)) canonCharGenderRef.current = "m";
     }
-    // If approachWaitingRef was set from the previous response, this is the
-    // user's first real dialog line — character may now respond freely.
-    const wasApproachWaiting = approachWaitingRef.current;
-    if (wasApproachWaiting) approachWaitingRef.current = false;
-
     try {
       const text = await callAPI(newMsgs, sessionMode, lang, intensity);
-      // Detect [SCENARIO:APPROACH] in the raw response — if found, set the flag
-      // so next user message knows character should have been silent this turn.
-      const isApproach = extractScenarioTag(text);
-      if (isApproach) approachWaitingRef.current = true;
       let turns = mergeTurns(splitTurns(text).map(parseTurn));
-      // Code-level enforcement: if model tagged APPROACH, strip all quoted speech
-      // from dialog turns in this response so character cannot speak before user.
-      if (isApproach) {
+      // Social mode: user always opens first. If isInRoleRef is still false,
+      // the model has not entered dialog yet — this is the scene-setting response.
+      // Strip any character speech so the user gets the opening line.
+      // No model cooperation needed — purely code-enforced.
+      const isFirstDialogInSocial = sessionMode === "social" && !isInRoleRef.current;
+      if (isFirstDialogInSocial && turns.some(t => t.modeTag === "dialog")) {
         turns = turns.map(t => {
           if (t.modeTag !== "dialog") return t;
-          // Remove anything inside quotes (straight and curly) — keep stage directions
-          const stripped = t.clean
-            .replace(/["""][^"""]*["""]/g, "")
-            .replace(/["'][^"']{2,}["']/g, "")
+          const stageOnly = t.clean
+            .split("\n")
+            .filter(l => { const tr = l.trim(); return !tr || /^\*[^*]+\*$/.test(tr); })
+            .join("\n")
             .trim();
-          return { ...t, clean: stripped };
+          return { ...t, clean: stageOnly };
         });
       }
       turnQueueRef.current = turns.slice(1);
@@ -3382,7 +3372,7 @@ export default function Profess() {
     pushTurn(lastInRoleTurnRef.current);
   };
 
-  const resetSession = () => { stopSpeech(); turnQueueRef.current = []; approachWaitingRef.current = false; currentRoleRef.current = "default"; recognitionRef.current?.stop(); setScreen("lang"); setLang(null); setSessionMode(null); setPendingMode(null); setIntensity(null); setScenario(null); setSummary(null); setLastExchange(null); setMessages([]); setInput(""); setError(null); setCurrentRole("default"); setCurrentMood("neutral"); setIsInRole(false); setIsTransitioning(false); setIsListening(false); setMicError(null); setCharCache({}); setShowMusicSuggest(false); hasOpenedMusic.current = false; setInCoachMode(false); };
+  const resetSession = () => { stopSpeech(); turnQueueRef.current = []; currentRoleRef.current = "default"; recognitionRef.current?.stop(); setScreen("lang"); setLang(null); setSessionMode(null); setPendingMode(null); setIntensity(null); setScenario(null); setSummary(null); setLastExchange(null); setMessages([]); setInput(""); setError(null); setCurrentRole("default"); setCurrentMood("neutral"); setIsInRole(false); setIsTransitioning(false); setIsListening(false); setMicError(null); setCharCache({}); setShowMusicSuggest(false); hasOpenedMusic.current = false; setInCoachMode(false); };
 
   const displayRole = (isInRole || currentRole !== "default") ? currentRole : "default";
   const charMeta = displayRole === "default"
