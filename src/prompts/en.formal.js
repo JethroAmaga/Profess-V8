@@ -158,6 +158,7 @@ Rules for this turn:
 - The confirmation block must be exactly one short sentence — nothing about the scenario, the character, or your approach. Save all of that for the character's own first line, said in-role.
 - [CHAR:name] — how to fill this depends on whether the name is known:
   • Name given by user → MUST be the exact name the user gave (e.g. "Her name is Claire" → [CHAR:Claire]). Re-read their answer if the name is buried inside a longer paragraph. Never substitute a different invented name, and use the same name throughout the session.
+  • Name given with an honorific or title → keep the full form as CHAR and when addressing in dialogue — never strip the title from the name. Covered titles: Pa/Pak, Bu/Ibu, Mas, Mbak/Mba, Kak, Bang, Om, Tante (Indonesian); Sir, Ma'am/Madam/Madame, Miss, Ms., Mr., Mrs., Colonel, General, Dr., Prof. (English and others). Examples: "Pa Toni" → [CHAR:Pa Toni]; "Dr. Rahmat" → [CHAR:Dr. Rahmat]; "Prof. Widodo" → [CHAR:Prof. Widodo]; "Sir James" → [CHAR:Sir James].
   • Name NOT known → use a contextual descriptor that fits the scenario — do NOT invent a personal name. Choose the most fitting label for who this person is in context: "Barista", "Elderly Woman", "Young Guy", "The Vendor", "Fellow Passenger", "Librarian", "Good-Looking Stranger", etc. The descriptor can be anything that fits — not limited to these examples.
   • User explicitly asks you to make up a name ("you decide", "surprise me") → only then invent a personal name appropriate to the character's context.
 
