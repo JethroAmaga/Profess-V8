@@ -2379,8 +2379,9 @@ export default function Profess() {
   const extractRole = (t) => (t.match(/\[ROLE:\s*(\w+)\]/) || [])[1] || null;
   const extractMood = (t) => (t.match(/\[MOOD:\s*(\w+)\]/) || [])[1] || null;
   const extractMode = (t) => (t.match(/\[MODE:\s*(\w+)\]/) || [])[1] || null;
-  const CHAR_BLACKLIST = /^(siapa|who|seseorang|someone|entah|unknown|nama|name)$/i;
-  const extractChar = (t) => { const m = t.match(/\[CHAR:\s*([^\]]+)\]/); return m ? (CHAR_BLACKLIST.test(m[1].trim()) ? null : m[1].trim()) : null; };
+  // Block only question-words that are never valid names.
+  const CHAR_QUESTION_WORDS = /^(siapa|who)$/i;
+  const extractChar = (t) => { const m = t.match(/\[CHAR:\s*([^\]]+)\]/); if (!m) return null; const n = m[1].trim(); return CHAR_QUESTION_WORDS.test(n) ? null : n; };
   const extractTitle = (t) => { const m = t.match(/\[TITLE:\s*([^\]]+)\]/); return m ? m[1].trim() : null; };
   const extractGender = (t) => { const m = t.match(/\[GENDER:\s*(f|m)\]/); return m ? m[1] : null; };
   // Strips identity tags plus any stray ((action)) or *asterisk* asides the
@@ -2476,7 +2477,7 @@ export default function Profess() {
     // the avatar/label on Profess after the character should have returned.
     let role = taggedRole || introRoleKey || (modeTag === "dialog" ? lastCharRoleRef.current : currentRoleRef.current);
     const introName = introOnly ? nameIntroMatch[1] : null;
-    let charName = taggedChar || (introName && !CHAR_BLACKLIST.test(introName.trim()) ? introName : null);
+    let charName = taggedChar || (introName && !CHAR_QUESTION_WORDS.test(introName.trim()) ? introName : null);
     // The spec only ever pairs [ROLE:default] with [MODE:coaching] — the model
     // occasionally mistags an established character's dialog continuation as
     // [ROLE:default] anyway (forgetting the character's real role key while
@@ -3138,8 +3139,12 @@ export default function Profess() {
     // Snapshot which character this specific message belongs to at the
     // moment it's pushed, so the bubble label can't drift if currentRole/
     // charCache changes later (e.g. queued turns advancing, transition delay).
+    // If no name is known yet (charNameFixed null and canon never set),
+    // show the role title instead of a random invented name — the character
+    // hasn't introduced themselves yet.
+    const nameUnknown = !charNameFixed && !canonCharNameRef.current;
     const charSnapshot = inRole ? {
-      name: charNameFixed || (charCache[displayRole] && charCache[displayRole].name) || displayRole,
+      name: nameUnknown ? (ROLE_TITLES[displayRole] || displayRole) : (charNameFixed || (charCache[displayRole] && charCache[displayRole].name) || displayRole),
       title: charTitle || (charCache[displayRole] && charCache[displayRole].title) || ROLE_TITLES[displayRole] || displayRole,
       accent: (charCache[displayRole] && charCache[displayRole].accent) || CHARS.default.accent,
     } : null;
@@ -3258,7 +3263,7 @@ export default function Profess() {
         return lines.some((line, i) => {
           if (i === lines.length - 1) return false;
           const stripped = line.trim().replace(/^[*_#\s]+|[*_:\s]+$/g, "");
-          return stripped && NAME_ONLY_RE.test(stripped) && !CHAR_BLACKLIST.test(stripped);
+          return stripped && NAME_ONLY_RE.test(stripped) && !CHAR_QUESTION_WORDS.test(stripped);
         });
       };
       const looksOffScript = turns.some((t, i) =>
