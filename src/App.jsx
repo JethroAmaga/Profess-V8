@@ -2118,7 +2118,8 @@ export default function Profess() {
   const extractRole = (t) => (t.match(/\[ROLE:\s*(\w+)\]/) || [])[1] || null;
   const extractMood = (t) => (t.match(/\[MOOD:\s*(\w+)\]/) || [])[1] || null;
   const extractMode = (t) => (t.match(/\[MODE:\s*(\w+)\]/) || [])[1] || null;
-  const extractChar = (t) => { const m = t.match(/\[CHAR:\s*([^\]]+)\]/); return m ? m[1].trim() : null; };
+  const CHAR_BLACKLIST = /^(siapa|who|seseorang|someone|entah|unknown|nama|name)$/i;
+  const extractChar = (t) => { const m = t.match(/\[CHAR:\s*([^\]]+)\]/); return m ? (CHAR_BLACKLIST.test(m[1].trim()) ? null : m[1].trim()) : null; };
   const extractTitle = (t) => { const m = t.match(/\[TITLE:\s*([^\]]+)\]/); return m ? m[1].trim() : null; };
   const extractGender = (t) => { const m = t.match(/\[GENDER:\s*(f|m)\]/); return m ? m[1] : null; };
   // Strips identity tags plus any stray ((action)) or *asterisk* asides the
