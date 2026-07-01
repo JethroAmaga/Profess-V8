@@ -1775,8 +1775,8 @@ const FlapCell = ({ target, delay, stepMs, flipDuration, mobileBoard }) => {
     };
   }, [target, delay, stepMs]);
 
-  const show = current === " " ? " " : current;
-  const showPrev = prev === " " ? " " : prev;
+  const show = current === " " ? " " : current;
+  const showPrev = prev === " " ? " " : prev;
   const cellTextStyle = { fontSize: mobileBoard ? "clamp(10px, 4.4vw, 20px)" : "clamp(7px, 1.8vw, 16px)", lineHeight:1, fontFamily:"'Manrope',monospace", fontWeight:700, letterSpacing:"0.03em" };
   const halfBase = { position:"absolute", insetInline:0, overflow:"hidden", background:"#181410", color:"#E9E5DC" };
   const textWrap = { position:"absolute", insetInline:0, display:"flex", alignItems:"center", justifyContent:"center", userSelect:"none", ...cellTextStyle };
@@ -2476,7 +2476,11 @@ export default function Profess() {
     // left isInRoleRef false) keeps falling back to currentRoleRef ("default")
     // even though this turn is explicitly tagged back into dialog, stranding
     // the avatar/label on Profess after the character should have returned.
-    let role = taggedRole || introRoleKey || (modeTag === "dialog" ? lastCharRoleRef.current : currentRoleRef.current);
+    // If the model emits a role key not in ROLE_TITLES (e.g. [ROLE:Prime Minister]),
+    // treat it as unrecognized and fall back to the last known character role so
+    // the avatar and name don't snap to the Profess default.
+    const knownTaggedRole = taggedRole && (taggedRole === "default" || ROLE_TITLES[taggedRole]) ? taggedRole : null;
+    let role = knownTaggedRole || introRoleKey || (modeTag === "dialog" ? lastCharRoleRef.current : currentRoleRef.current);
     const introName = introOnly ? nameIntroMatch[1] : null;
     let charName = taggedChar || (introName && !CHAR_QUESTION_WORDS.test(introName.trim()) ? introName : null);
     // The spec only ever pairs [ROLE:default] with [MODE:coaching] — the model
@@ -3312,9 +3316,9 @@ export default function Profess() {
       const text = await callAPI(newMsgs, sessionMode, lang, intensity);
       let turns = mergeTurns(splitTurns(text).map(parseTurn));
       // Social mode: user always opens first. If isInRoleRef is still false,
-      // the model has not entered dialog yet — this is the scene-setting response.
-      // Strip any character speech so the user gets the opening line.
-      // No model cooperation needed — purely code-enforced.
+      // the model has not entered dialog yet — strip any character speech so
+      // the user gets the opening line. Formal mode allows the character to
+      // open (e.g. Government side in a debate, interviewer in a job interview).
       const isFirstDialogInSocial = sessionMode === "social" && !isInRoleRef.current;
       if (isFirstDialogInSocial && turns.some(t => t.modeTag === "dialog")) {
         turns = turns.map(t => {
