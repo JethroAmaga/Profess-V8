@@ -77,7 +77,7 @@ export function containsBannedContent(text) {
 // far longer than any single instructed line, so raising the threshold still
 // catches those while clearing this false-positive class.
 const LEAK_CHUNK_LEN = 110;
-const LEAK_CHUNK_STRIDE = 55;
+const LEAK_CHUNK_STRIDE = 30;
 
 function normalize(s) {
   return s.toLowerCase().replace(/\s+/g, " ");

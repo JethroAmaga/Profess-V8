@@ -34,9 +34,15 @@ export default async function handler(req, res) {
     }
 
     // Default voice: "Rachel" (well-known stable public voice id). Override via env if desired.
-    const voiceId = process.env.ELEVENLABS_VOICE_ID || "21m00Tcm4TlvDq8ikWAM";
+    const rawVoiceId = process.env.ELEVENLABS_VOICE_ID || "21m00Tcm4TlvDq8ikWAM";
+    const rawModelId = process.env.ELEVENLABS_MODEL_ID || "eleven_turbo_v2_5";
+    const ID_RE = /^[a-zA-Z0-9_-]{8,64}$/;
+    if (!ID_RE.test(rawVoiceId) || !ID_RE.test(rawModelId)) {
+      console.error("Invalid ElevenLabs voice/model ID in environment");
+      return res.status(500).json({ error: { message: "Voice service misconfigured" } });
+    }
 
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${rawVoiceId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -44,7 +50,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         text,
-        model_id: process.env.ELEVENLABS_MODEL_ID || "eleven_turbo_v2_5",
+        model_id: rawModelId,
         voice_settings: { stability: 0.5, similarity_boost: 0.75 },
       }),
     });
@@ -52,7 +58,7 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
       console.error("ElevenLabs API error:", response.status, errData);
-      return res.status(response.status).json({ error: { message: "Voice service unavailable" } });
+      return res.status(503).json({ error: { message: "Voice service unavailable" } });
     }
 
     const arrayBuffer = await response.arrayBuffer();
