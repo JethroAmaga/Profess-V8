@@ -3113,6 +3113,11 @@ export default function Profess() {
       setTimeout(() => { setCurrentRole(newRole||prevRole); setCurrentMood(newMood||"neutral"); setIsInRole(newInRole); setIsTransitioning(false); }, 380);
     } else {
       if (newMood) setCurrentMood(newMood);
+      // Sync currentRole state with the ref — a previous coaching turn's
+      // deferred setCurrentRole("default") can leave state behind while the
+      // ref already moved forward; without this the avatar stays on Profess
+      // even though isInRole is true and the ref says the right character.
+      if (newRole && newRole !== "default") setCurrentRole(newRole);
       setIsInRole(newInRole);
       if ((charName || charTitle || charGender) && prevRole !== "default") {
         const cached = charCache[prevRole];
@@ -3445,8 +3450,11 @@ export default function Profess() {
   const continueRoleplay = () => {
     if (loading) return;
     if (!lastInRoleTurnRef.current) return;
-    // Replay the character's last line exactly — no API call needed.
+    // Stop any ongoing coach speech and clear the queue, then replay the
+    // character's last line — same as the stop button but targeted.
     // inCoachMode will clear via the useEffect that watches isInRole.
+    stopSpeech();
+    turnQueueRef.current = [];
     pushTurn(lastInRoleTurnRef.current);
   };
 
