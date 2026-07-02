@@ -2050,7 +2050,7 @@ function TextFlippingBoard({ text, className, style, duration = FLAP_BASE_TOTAL_
   }, [text]);
 
   return (
-    <div className={className} style={{ position:"relative", width:"100%", maxWidth: mobileBoard ? "none" : "640px", margin:"0 auto", borderRadius:"10px", background:"#141210", padding: mobileBoard ? "6px" : "10px", boxShadow:"0 16px 50px -12px rgba(0,0,0,0.55)", ...style }}>
+    <div className={className} style={{ position:"relative", width:"100%", maxWidth: mobileBoard ? "none" : "640px", margin:"0 auto", borderRadius:"10px", background:"#141210", border:"1px solid #221E18", padding: mobileBoard ? "6px" : "10px", boxShadow:"inset 0 1px 0 rgba(255,255,255,0.03), 0 16px 50px -12px rgba(0,0,0,0.55)", ...style }}>
       <div style={{ display:"grid", gap: mobileBoard ? "1.5px" : "2px", gridTemplateColumns:`repeat(${FLAP_BOARD_COLS}, 1fr)` }}>
         {board.map((row, r) => row.map((ch, c) => (
           <FlapCell key={`${r}-${c}`} target={ch} delay={c*colDelay + r*rowDelay} stepMs={stepMs} flipDuration={flipDur} mobileBoard={mobileBoard}/>
@@ -3609,6 +3609,7 @@ export default function Profess() {
     ::-webkit-scrollbar{width:2px;}
     ::-webkit-scrollbar-track{background:transparent;}
     ::-webkit-scrollbar-thumb{background:#1E1E1E;border-radius:1px;}
+    ::selection{background:rgba(200,164,88,.22);color:#F2EDE2;}
 
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -3656,6 +3657,13 @@ export default function Profess() {
 
     button{cursor:pointer;}
     button:focus-visible{outline:1px solid #C8A870;outline-offset:2px;}
+
+    .btn-outline{transition:background .25s ease,border-color .25s ease,color .25s ease,box-shadow .25s ease,transform .15s ease;}
+    .btn-outline:hover{background:rgba(200,164,88,.07) !important;border-color:#DDBE78 !important;color:#DDBE78 !important;box-shadow:0 0 22px rgba(200,164,88,.10);}
+    .btn-outline:active{transform:translateY(1px);}
+    .btn-ghost{transition:border-color .25s ease,color .25s ease,transform .15s ease;}
+    .btn-ghost:hover{border-color:#4A4438 !important;color:#B8B2A6 !important;}
+    .btn-ghost:active{transform:translateY(1px);}
 
     @media (max-width:640px){
       .hero-section{height:auto !important;padding-bottom:40px !important;}
@@ -3714,13 +3722,13 @@ export default function Profess() {
           <>
             <TextFlippingBoard key="ask" text={askText}/>
             <div style={{ display:"flex", gap:"16px" }}>
-              <button
+              <button className="btn-outline"
                 onClick={() => { setTutorialIdx(0); setWelcomeStep("tutorial"); }}
                 style={{ background:"none", border:"1px solid #C8A458", color:"#C8A458", fontFamily:"'Manrope',sans-serif", fontSize:"12px", letterSpacing:".1em", textTransform:"uppercase", padding:"12px 28px", cursor:"pointer" }}
               >
                 {lang === "id" ? "Ya" : "Yes"}
               </button>
-              <button
+              <button className="btn-ghost"
                 onClick={() => setWelcomeStep("back")}
                 style={{ background:"none", border:"1px solid #2A2520", color:"#8A8478", fontFamily:"'Manrope',sans-serif", fontSize:"12px", letterSpacing:".1em", textTransform:"uppercase", padding:"12px 28px", cursor:"pointer" }}
               >
@@ -3733,7 +3741,7 @@ export default function Profess() {
         {welcomeStep === "tutorial" && (
           <>
             <TextFlippingBoard key={"tut"+tutorialIdx} text={TUTORIAL_LINES[tutorialIdx]}/>
-            <button
+            <button className="btn-outline"
               onClick={() => {
                 if (tutorialIdx < TUTORIAL_LINES.length - 1) setTutorialIdx(i => i + 1);
                 else setScreen("intro");
@@ -3748,7 +3756,7 @@ export default function Profess() {
         {welcomeStep === "back" && (
           <>
             <TextFlippingBoard key="back" text={backText}/>
-            <button
+            <button className="btn-outline"
               onClick={() => setScreen("intro")}
               style={{ background:"none", border:"1px solid #C8A458", color:"#C8A458", fontFamily:"'Manrope',sans-serif", fontSize:"12px", letterSpacing:".1em", textTransform:"uppercase", padding:"12px 28px", cursor:"pointer" }}
             >
@@ -3768,7 +3776,7 @@ export default function Profess() {
         {introOverlay}
         <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:-1 }}><DottedGlowBackground/></div>
         <div style={{ maxWidth:"480px", marginBottom:"4px" }}>
-          <p style={{ fontSize:"9px", letterSpacing:".2em", textTransform:"uppercase", color:"#2A2520", marginBottom:"10px" }}>
+          <p style={{ fontSize:"9px", letterSpacing:".2em", textTransform:"uppercase", color:"#5A5344", marginBottom:"10px" }}>
             {lang==="id" ? "Sebelum Memulai" : "Before You Begin"}
           </p>
           <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(20px,2.6vw,28px)", color:"#C8A458", lineHeight:1.5, marginBottom:"10px", fontWeight:400 }}>
@@ -4228,7 +4236,7 @@ export default function Profess() {
           <div className="hero-content" style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"flex-start", justifyContent:"center", padding:"80px 40px 0 clamp(40px,8vw,140px)", position:"relative", zIndex:2 }}>
             <div style={{ maxWidth:"640px", width:"100%", display:"flex", flexDirection:"column", gap:"24px" }}>
               <div>
-                <p style={{ fontSize:"9px", letterSpacing:".2em", textTransform:"uppercase", color:"#2A2520", marginBottom:"16px" }}>Communication Training</p>
+                <p style={{ fontSize:"9px", letterSpacing:".2em", textTransform:"uppercase", color:"#5A5344", marginBottom:"16px" }}>Communication Training</p>
                 <h1 className="hero-tagline" style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(40px,5vw,60px)", fontWeight:400, lineHeight:1.15, color:"#E9E5DC", letterSpacing:"-.01em" }}>
                   <SquigglyText as="div">Every conversation<br/>
                   has another side.</SquigglyText>
@@ -4509,7 +4517,7 @@ export default function Profess() {
         <ScrollRevealSection isMobile={isMobile} style={{ background:"#060606", borderTop:"1px solid #141414" }}>
           <div ref={globeSectionRef} style={{ padding:"56px 40px 40px" }}>
             <div style={{ maxWidth:"960px", margin:"0 auto" }}>
-              <p style={{ fontSize:"9px", letterSpacing:".2em", textTransform:"uppercase", color:"#2A2520", marginBottom:"8px", textAlign:"center" }}>
+              <p style={{ fontSize:"9px", letterSpacing:".2em", textTransform:"uppercase", color:"#5A5344", marginBottom:"8px", textAlign:"center" }}>
                 {lang==="id" ? "Lintas Negara" : "Across Borders"}
               </p>
               <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(20px,2.4vw,28px)", fontWeight:400, color:"#C8A458", textAlign:"center", marginBottom:"32px", lineHeight:1.5 }}>
@@ -4624,7 +4632,7 @@ export default function Profess() {
         {/* Example conversations — fixed cards, tilted 3D marquee */}
         <ScrollRevealSection isMobile={isMobile}>
           <div style={{ padding: isMobile ? "32px 0 0" : "48px 0 0", background:"#060606", borderTop:"1px solid #141414" }}>
-            <p style={{ fontSize:"9px", letterSpacing:".2em", textTransform:"uppercase", color:"#2A2520", marginBottom:"8px", textAlign:"center" }}>
+            <p style={{ fontSize:"9px", letterSpacing:".2em", textTransform:"uppercase", color:"#5A5344", marginBottom:"8px", textAlign:"center" }}>
               {lang==="id" ? "Contoh Percakapan" : "Example Exchanges"}
             </p>
             <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(20px,2.4vw,28px)", fontWeight:400, color:"#C8A458", textAlign:"center", marginBottom:"8px", lineHeight:1.5, padding:"0 24px" }}>
@@ -5150,7 +5158,7 @@ export default function Profess() {
     const segments = isA ? parseSegments(msg.content, mInRole) : null;
     return (
       <div key={i} className="msg-enter" style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
-        <span style={{ fontSize:"9px", letterSpacing:".12em", textTransform:"uppercase", fontWeight:500, color:isA?(mInRole?mc.accent:"#C8A458"):"#2A2A2A" }}>
+        <span style={{ fontSize:"9px", letterSpacing:".12em", textTransform:"uppercase", fontWeight:500, color:isA?(mInRole?mc.accent:"#C8A458"):"#4A453C" }}>
           {isA?(mInRole?mc.name:"Profess"):"You"}
         </span>
         {isA && segments ? (
@@ -5159,12 +5167,12 @@ export default function Profess() {
               if (seg.type==="section_break") return (
                 <div key={si} style={{ display:"flex", alignItems:"center", gap:"14px", margin:"14px 0 8px" }}>
                   <div style={{ flex:1, height:"1px", background:"#141414" }}/>
-                  <span style={{ fontSize:"9px", letterSpacing:".12em", textTransform:"uppercase", color:"#2A2520" }}>coach</span>
+                  <span style={{ fontSize:"9px", letterSpacing:".12em", textTransform:"uppercase", color:"#4A453C" }}>coach</span>
                   <div style={{ flex:1, height:"1px", background:"#141414" }}/>
                 </div>
               );
               if (seg.type==="coaching") return (
-                <p key={si} style={{ fontSize:"13px", lineHeight:2, color:"6A6560", whiteSpace:"pre-wrap", fontStyle:"italic", paddingLeft:"16px" }}>
+                <p key={si} style={{ fontSize:"13px", lineHeight:2, color:"#6A6560", whiteSpace:"pre-wrap", fontStyle:"italic", paddingLeft:"16px" }}>
                   {renderMarkdown(seg.text)}
                 </p>
               );
@@ -5180,7 +5188,7 @@ export default function Profess() {
               );
             })}
           </div>
-        ) : <p style={{ fontSize, lineHeight:1.9, color:"#6A6760", whiteSpace:"pre-wrap" }}>{renderMarkdown(msg.content)}</p>}
+        ) : <p style={{ fontSize, lineHeight:1.9, color:"#7A766E", whiteSpace:"pre-wrap" }}>{renderMarkdown(msg.content)}</p>}
       </div>
     );
   });
@@ -5205,11 +5213,11 @@ export default function Profess() {
       {micError && <p style={{ fontSize:"10px", color:"#BC5A5A", textAlign:"center" }}>{micError}</p>}
       <div style={{ display:"flex", gap:"8px", alignItems:"flex-end" }}>
         <textarea ref={textareaRef}
-          style={{ flex:1, background:"#0A0A0A", border:`1px solid ${isListening?"#7A4040":"#1A1A1A"}`, color:"#E9E5DC", fontFamily:"inherit", fontSize:inputFs, fontWeight:300, lineHeight:1.7, padding:inputPad, resize:"none", outline:"none", minHeight:btnSz, maxHeight:"150px", overflowY:"auto", transition:"border-color .2s" }}
+          style={{ flex:1, background:"#0A0A0A", border:`1px solid ${isListening?"#7A4040":"#1A1A1A"}`, color:"#E9E5DC", fontFamily:"inherit", fontSize:inputFs, fontWeight:300, lineHeight:1.7, padding:inputPad, resize:"none", outline:"none", minHeight:btnSz, maxHeight:"150px", overflowY:"auto", transition:"border-color .25s ease, box-shadow .25s ease" }}
           placeholder={isListening?(lang==="id"?"Mendengarkan...":"Listening..."):(lang==="id"?"Ketik sesuatu...":"Say something...")}
           value={input} onChange={handleTA} onKeyDown={handleKeyDown} rows={1}
-          onFocus={e=>{ if(!isListening) e.target.style.borderColor="#242424"; }}
-          onBlur={e=>{ if(!isListening) e.target.style.borderColor="#1A1A1A"; }}/>
+          onFocus={e=>{ if(!isListening){ e.target.style.borderColor="#3A3226"; e.target.style.boxShadow="0 0 0 1px rgba(200,164,88,.06), 0 4px 18px rgba(0,0,0,.35)"; } }}
+          onBlur={e=>{ if(!isListening){ e.target.style.borderColor="#1A1A1A"; e.target.style.boxShadow="none"; } }}/>
         {isSpeaking && (
           <button onClick={skipSpeech} style={{ background:"#0E0808", border:"1px solid #4A2828", color:"#7A4848", width:btnSz, height:btnSz, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"border-color .2s, color .2s" }}
             onMouseEnter={e=>{ e.currentTarget.style.borderColor="#7A4848"; e.currentTarget.style.color="#BC7A7A"; }}
