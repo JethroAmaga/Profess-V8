@@ -7,6 +7,15 @@ const buckets = new Map(); // ip -> { count, resetAt }
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 15;
 
+// Prune expired entries every 5 minutes to prevent unbounded Map growth
+// on long-lived warm function instances.
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, bucket] of buckets) {
+    if (now > bucket.resetAt) buckets.delete(key);
+  }
+}, 5 * 60_000).unref?.();
+
 export function getClientIp(req) {
   const fwd = req.headers["x-forwarded-for"];
   if (fwd) return fwd.split(",")[0].trim();
