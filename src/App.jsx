@@ -2393,6 +2393,7 @@ export default function Profess() {
     .replace(/\[MODE:\s*\w+\]/g,"").replace(/\[INNER:\s*.*?\]/g,"")
     .replace(/\[CHAR:\s*[^\]]+\]/g,"").replace(/\[TITLE:\s*[^\]]+\]/g,"")
     .replace(/\[GENDER:\s*[^\]]+\]/g,"")
+    .replace(/\[SCENARIO:\s*[^\]]+\]/g,"")
     .replace(/\(\([^)]*\)\)/g,"")
     .replace(/^---+$/gm, "")
     // Weak-model safety net: sometimes a tag is attempted without brackets
@@ -3178,6 +3179,7 @@ export default function Profess() {
     setMessages(prev => {
       const last = prev[prev.length - 1];
       if (last && last.role === "assistant" && last.content === clean && !inRole) return prev;
+      if (!clean && inRole) return prev; // drop empty dialog turns (APPROACH scenario placeholder)
       return [...prev, { role: "assistant", content: clean, inRole, charSnapshot }];
     });
     speak(clean, role, mood, inRole, advanceTurnQueue);
@@ -3319,6 +3321,15 @@ export default function Profess() {
     try {
       const text = await callAPI(newMsgs, sessionMode, lang, intensity);
       let turns = mergeTurns(splitTurns(text).map(parseTurn));
+      // When the user explicitly asked for coaching, every turn in the
+      // response is feedback — force any dialog-tagged chunks to coaching
+      // so the model's occasional mis-tagging doesn't push coaching text
+      // under the character's avatar and name.
+      const COACH_REQUEST_RE = /please pause.*roleplay|tolong hentikan.*roleplay|need feedback.*profess|butuh masukan.*profess/i;
+      if (COACH_REQUEST_RE.test(msg)) {
+        turns = turns.map(t => t.modeTag === "dialog" ? { ...t, modeTag: "coaching", role: "default" } : t);
+        turns = mergeTurns(turns);
+      }
       // User always opens first. Exception: if the user's first message is a
       // yield phrase ("go ahead", "silakan mulai", etc.), skip stripping so the
       // character can legitimately open (e.g. Government in a debate).
@@ -4860,7 +4871,7 @@ export default function Profess() {
     const SCENARIOS = {
       formal: {
         id: [
-          { group:"Akademik", items:["Sidang Skripsi — Penguji yang Skeptis","Presentasi Seminar — Dosen yang Tidak Yakin","Debat Parlemen Asia (AP) — Mosi Kontroversial","Debat Parlemen Britania (BP) — Mosi Kontroversial","Ospek Organisasi — Senior yang Menguji Mental"] },
+          { group:"Akademik", items:["Sidang Skripsi — Penguji yang Skeptis","Presentasi Seminar — Dosen yang Tidak Yakin","Debat Parlemen Asia (AP) — Mosi Kontroversial","Ospek Organisasi — Senior yang Menguji Mental"] },
           { group:"Karir", items:["Interview Kerja Pertama — HRD yang Kritis","Pitching Startup ke Investor — 5 Menit untuk Meyakinkan","Negosiasi Gaji — Atasan yang Tidak Mudah","Press Conference — Jurnalis yang Agresif","Rapat dengan Klien — Keputusan di Tangan Mereka"] },
           { group:"Hukum & Publik", items:["Persidangan Mock Trial — Jaksa yang Tidak Memberi Celah","Debat Publik — Lawan yang Lebih Berpengalaman","Audiensi dengan Pejabat — Birokrasi yang Tidak Berpihak"] },
         ],
@@ -5034,7 +5045,7 @@ export default function Profess() {
     const isA = msg.role==="assistant";
     const mInRole = isA && msg.inRole;
     const mc = isA
-      ? (msg.charSnapshot || (mInRole ? (charCache[currentRole]||CHARS.default) : (currentRole!=="default"?(charCache[currentRole]||CHARS.default):CHARS.default)))
+      ? (msg.charSnapshot || (mInRole ? (charCache[currentRole]||CHARS.default) : CHARS.default))
       : CHARS.default;
     const segments = isA ? parseSegments(msg.content, mInRole) : null;
     return (
