@@ -2567,7 +2567,7 @@ export default function Profess() {
         // Exclude vocative uses: name preceded by comma (“Wake up, Jimin,”)
         // or followed by comma/! (“Jimin, are you okay?”) — those are
         // address forms, not self-reference in the third person.
-        const nameRe = new RegExp(`(?<!,\\s{0,5})\\b${escaped}\\b(?!\\s*[,!])`, “i”);
+        const nameRe = new RegExp(`(?<!,\\s{0,5})\\b${escaped}\\b(?!\\s*[,!])`, "i");
         const quoted = clean.match(/”(?:[^”\\]|\\.)*”|”[^”]*”/g) || [];
         selfThirdPerson = quoted.some(q => nameRe.test(q));
       }
