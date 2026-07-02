@@ -16,9 +16,9 @@ const VALID_INTENSITIES = new Set(["comfortable", "challenging", "no_mercy"]);
 const MAX_MESSAGES = 50;
 const MAX_CONTENT_CHARS = 6000;
 
-const PRIMARY_MODEL    = "qwen/qwen3-next-80b-a3b-instruct";
-const FALLBACK_MODEL   = "meta/llama-3.3-70b-instruct";
-const FALLBACK_MODEL_2 = "qwen/qwen3.5-397b-a17b";
+const PRIMARY_MODEL    = "qwen/qwen3.5-397b-a17b";
+const FALLBACK_MODEL   = "qwen/qwen3-next-80b-a3b-instruct";
+const FALLBACK_MODEL_2 = "meta/llama-3.3-70b-instruct";
 const PRIMARY_TIMEOUT_MS    = 38000;
 const FALLBACK_TIMEOUT_MS   = 15000;
 const FALLBACK_TIMEOUT_MS_2 = 15000;
