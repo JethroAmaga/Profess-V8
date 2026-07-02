@@ -1824,8 +1824,8 @@ const FlapCell = ({ target, delay, stepMs, flipDuration, mobileBoard }) => {
     };
   }, [target, delay, stepMs]);
 
-  const show = current === " " ? " " : current;
-  const showPrev = prev === " " ? " " : prev;
+  const show = current === " " ? " " : current;
+  const showPrev = prev === " " ? " " : prev;
   const cellTextStyle = { fontSize: mobileBoard ? "clamp(10px, 4.4vw, 20px)" : "clamp(7px, 1.8vw, 16px)", lineHeight:1, fontFamily:"'Manrope',monospace", fontWeight:700, letterSpacing:"0.03em" };
   const halfBase = { position:"absolute", insetInline:0, overflow:"hidden", background:"#181410", color:"#E9E5DC" };
   const textWrap = { position:"absolute", insetInline:0, display:"flex", alignItems:"center", justifyContent:"center", userSelect:"none", ...cellTextStyle };
@@ -3395,6 +3395,24 @@ export default function Profess() {
       const COACH_REQUEST_RE = /please pause.*roleplay|tolong hentikan.*roleplay|need feedback.*profess|butuh masukan.*profess/i;
       if (COACH_REQUEST_RE.test(msg)) {
         turns = turns.map(t => t.modeTag === "dialog" ? { ...t, modeTag: "coaching", role: "default" } : t);
+        turns = mergeTurns(turns);
+      } else if (lastCharRoleRef.current && lastCharRoleRef.current !== "default") {
+        // Inverse of the block above. Right after a coach interruption the
+        // model sometimes mis-tags an in-character dialog continuation as
+        // [ROLE:default][MODE:coaching], which would wrongly revert the
+        // avatar/name to Profess even though the text is clearly the
+        // character speaking. When the user did NOT ask for coaching and a
+        // roleplay is active, snap any coaching-tagged turn that carries
+        // roleplay markers back to the character. Profess's real coaching is
+        // meta-advice addressed to "you" and never contains multi-word
+        // *stage directions* or a `Name: "..."` speech line, so genuine
+        // periodic feedback is left untouched.
+        const ROLEPLAY_MARKER_RE = /\*[^*\n]+\s[^*\n]+\*|^\s*[A-Z][\w.'’-]+(?: [A-Z][\w.'’-]+){0,3}:\s*["“]/m;
+        turns = turns.map(t =>
+          (t.modeTag === "coaching" && t.role === "default" && ROLEPLAY_MARKER_RE.test(t.clean))
+            ? { ...t, modeTag: "dialog", role: lastCharRoleRef.current }
+            : t
+        );
         turns = mergeTurns(turns);
       }
       // User always opens first. Exception: if the user's first message is a
