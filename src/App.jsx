@@ -71,6 +71,7 @@ const ROLE_TITLES = {
   // Formal — Audience
   voter:"Voter", shareholder:"Shareholder", consumer:"Consumer",
   media_audience:"Audience",
+  celebrity:"Celebrity",
   // Social — Relasi Dekat
   friend_female:"Old Friend", friend_male:"Old Friend",
   best_friend:"Best Friend", ex_partner:"Ex", sibling:"Sibling",
@@ -141,6 +142,7 @@ const NAME_POOL = {
   shareholder:      N("Margaret Stone","Robert Hayes","Anna Kovács","Henrik Larsson","Camila Reyes","Alejandro Ruiz","Fatima Diallo","Emmanuel Eze","Meera Pillai","Sanjay Kapoor","Yuna Choi","Dong Hyun Lee","Rini Setiawan","Hendra Gunawan"),
   consumer:         N("Rachel Stone","Andrew Cole","Anna Kovács","Henrik Larsson","Camila Reyes","Alejandro Ruiz","Fatima Diallo","Emmanuel Eze","Meera Pillai","Sanjay Kapoor","Yuna Choi","Dong Hyun Lee","Rini Setiawan","Hendra Gunawan"),
   media_audience:   N("Rachel Stone","Andrew Cole","Anna Kovács","Henrik Larsson","Camila Reyes","Alejandro Ruiz","Fatima Diallo","Emmanuel Eze","Meera Pillai","Sanjay Kapoor","Yuna Choi","Dong Hyun Lee","Rini Setiawan","Hendra Gunawan"),
+  celebrity:        N("Sienna Blake","Leo Marchetti","Zara Rhodes","Marco Diaz","Amara Osei","Kai Yamamoto","Sofia Reyes","Liam Chen","Luna Park","Enzo Ferrara","Isla Scott","Ravi Kapoor","Ariel Santos","Dian Kusuma"),
   // Social — relasi dekat
   friend_female:    N("Lily","Alex","Léa","Luka","Valentina","Mateo","Zuri","Kofi","Nisha","Rohan","Hana","Jae","Putri","Bagas"),
   friend_male:      N("Alex","Alex","Luka","Luka","Mateo","Mateo","Kofi","Kofi","Rohan","Rohan","Jae","Jae","Bagas","Bagas"),
@@ -501,7 +503,7 @@ function buildSVG(charOrKey, mood, isTalking, scene = "role") {
     <path d="M124 199 Q130 202 136 199" stroke="${darken(s,16)}" stroke-width="0.8" fill="none" opacity=".4"/>`;
   const armL = `${armLNoHand}${handL}`;
   // Gesture wraps right arm during talking for expressive roles
-  const gestureRoles = ["interviewer","journalist","opponent","prosecutor","negotiator","ceo","executive","friend_female","best_friend","friend_male","acquirer"];
+  const gestureRoles = ["interviewer","journalist","opponent","prosecutor","negotiator","ceo","executive","friend_female","best_friend","friend_male","acquirer","celebrity"];
   const wrapGesture = (inner) => (isTalking && gestureRoles.includes(roleKey))
     ? `<g style="animation:gesturePoint 3s ease-in-out infinite;transform-origin:129px 132px">${inner}</g>`
     : inner;
@@ -1386,6 +1388,52 @@ break;
           <rect x="125" y="165" width="8"  height="5"  fill="#2A4A6A" opacity=".6" rx="1"/>`;
         hideLegs = true; break;
 
+      // ── Celebrity — warm TV studio chair ─────────────────────────────
+      case "celebrity":
+        backProps = `
+          <!-- Warm studio backdrop -->
+          <rect x="0" y="0" width="160" height="240" fill="#1A0E0A"/>
+          <rect x="0" y="0" width="160" height="195" fill="#2C1410"/>
+          <!-- Drape folds -->
+          <line x1="18"  y1="0" x2="18"  y2="195" stroke="#1E0E08" stroke-width="3" opacity=".55"/>
+          <line x1="44"  y1="0" x2="44"  y2="195" stroke="#1E0E08" stroke-width="3" opacity=".55"/>
+          <line x1="70"  y1="0" x2="70"  y2="195" stroke="#1E0E08" stroke-width="3" opacity=".55"/>
+          <line x1="96"  y1="0" x2="96"  y2="195" stroke="#1E0E08" stroke-width="3" opacity=".55"/>
+          <line x1="122" y1="0" x2="122" y2="195" stroke="#1E0E08" stroke-width="3" opacity=".55"/>
+          <line x1="148" y1="0" x2="148" y2="195" stroke="#1E0E08" stroke-width="3" opacity=".55"/>
+          <!-- Overhead warm spotlights -->
+          <ellipse cx="46"  cy="0" rx="40" ry="24" fill="#D49040" opacity=".08"/>
+          <ellipse cx="114" cy="0" rx="40" ry="24" fill="#D49040" opacity=".08"/>
+          <!-- Studio floor -->
+          <rect x="0" y="195" width="160" height="45" fill="#120A06"/>
+          <!-- Studio chair back -->
+          <rect x="18" y="132" width="124" height="58" fill="#2A1810" rx="6"/>
+          <rect x="20" y="134" width="120" height="54" fill="#341E12" rx="5"/>
+          <!-- Chair armrests -->
+          <rect x="8"  y="168" width="22" height="40" fill="#3A2010" rx="4"/>
+          <rect x="130" y="168" width="22" height="40" fill="#3A2010" rx="4"/>`;
+        bodySVG = `
+          <rect x="44" y="136" rx="12" width="72" height="56" fill="url(#outfitGrad)"/>
+          <path d="M60 136 Q80 148 100 136" fill="none" stroke="${darken(b,10)}" stroke-width="1.5"/>
+          ${outfitAccent(80,152,40)}
+          ${armLNoHand}${armRNoHand}`;
+        frontProps = `
+          <!-- Armrest tops in front -->
+          <rect x="8"   y="178" width="22" height="10" fill="#4A2818" rx="3"/>
+          <rect x="130" y="178" width="22" height="10" fill="#4A2818" rx="3"/>
+          <!-- Thighs -->
+          <rect x="48" y="190" width="26" height="24" fill="${darken(b,18)}" rx="4"/>
+          <rect x="86" y="190" width="26" height="24" fill="${darken(b,18)}" rx="4"/>
+          <!-- Lower legs -->
+          <rect x="52" y="210" width="18" height="20" fill="${darken(b,22)}" rx="3"/>
+          <rect x="90" y="210" width="18" height="20" fill="${darken(b,22)}" rx="3"/>
+          <!-- Shoes -->
+          <ellipse cx="63"  cy="230" rx="16" ry="6" fill="${darken(b,30)}"/>
+          <ellipse cx="101" cy="230" rx="16" ry="6" fill="${darken(b,30)}"/>
+          <!-- Hands relaxed on armrests -->
+          ${handL}${handR}`;
+        hideLegs = true; break;
+
       // ── Default social/casual ─────────────────────────────────────────
       default:
         backProps = `<rect x="20" y="100" width="120" height="10" rx="4" fill="#1E1814"/>`;
@@ -1412,6 +1460,7 @@ break;
     friend_female:"gestureOpen 3s ease-in-out infinite",
     best_friend: "gestureOpen 2.8s ease-in-out infinite",
     friend_male: "gestureOpen 3.5s ease-in-out infinite",
+    celebrity:   "gestureOpen 3.2s ease-in-out infinite",
   }[roleKey] || null : null;
 
   // Blink timing — slightly different per character so they don't all blink at once
@@ -1900,6 +1949,8 @@ const CONVERSATION_CARDS = [
     linesEn:[{speaker:"user",text:"You've missed the last two meetings. Are you still in on this?"},{speaker:"char",text:"I am, I just lost track of time. Send me what I owe and I'll catch up tonight."}] },
   { roleKey:"grandparent", gender:"f", name:"Sumarni", locale:"id", roleId:"Nenek",
     linesId:[{speaker:"user",text:"Nek, saya mau pindah kerja ke kota lain bulan depan."},{speaker:"char",text:"Pindah boleh, asal kamu masih telepon nenek tiap minggu."}] },
+  { roleKey:"celebrity", gender:"f", name:"Sienna", locale:"en", roleEn:"Media Interview",
+    linesEn:[{speaker:"char",text:"Off the record? I haven't been this honest in an interview in years."},{speaker:"user",text:"Then let's stay off the record a little longer."}] },
   { roleKey:"romantic_interest", gender:"f", name:"Adrienne", locale:"en", roleEn:"Defining the Relationship",
     linesEn:[{speaker:"user",text:"I don't want to keep guessing what this is between us."},{speaker:"char",text:"Then I'll stop being vague. I want this to be something real."}] },
   { roleKey:"auditor", gender:"m", name:"Conrad", locale:"en", roleEn:"Compliance Review",
@@ -2287,6 +2338,7 @@ export default function Profess() {
       heroRow: [
         generateChar("golf_partner"),
         generateChar("padel_partner"),
+        generateChar("celebrity"),
         generateChar("date"),
         generateChar("manager"),
       ],
@@ -4872,12 +4924,12 @@ export default function Profess() {
       formal: {
         id: [
           { group:"Akademik", items:["Sidang Skripsi — Penguji yang Skeptis","Presentasi Seminar — Dosen yang Tidak Yakin","Debat Parlemen Asia (AP) — Mosi Kontroversial","Ospek Organisasi — Senior yang Menguji Mental"] },
-          { group:"Karir", items:["Interview Kerja Pertama — HRD yang Kritis","Pitching Startup ke Investor — 5 Menit untuk Meyakinkan","Negosiasi Gaji — Atasan yang Tidak Mudah","Press Conference — Jurnalis yang Agresif","Rapat dengan Klien — Keputusan di Tangan Mereka"] },
+          { group:"Karir", items:["Interview Kerja Pertama — HRD yang Kritis","Pitching Startup ke Investor — 5 Menit untuk Meyakinkan","Negosiasi Gaji — Atasan yang Tidak Mudah","Press Conference — Jurnalis yang Agresif","Wawancara Eksklusif — Kamu yang Jadi Jurnalis","Rapat dengan Klien — Keputusan di Tangan Mereka"] },
           { group:"Hukum & Publik", items:["Persidangan Mock Trial — Jaksa yang Tidak Memberi Celah","Debat Publik — Lawan yang Lebih Berpengalaman","Audiensi dengan Pejabat — Birokrasi yang Tidak Berpihak"] },
         ],
         en: [
           { group:"Academic", items:["Thesis Defense — The Skeptical Examiner","Seminar Presentation — The Unconvinced Professor","Asian Parliamentary (AP) Debate — A Controversial Motion","Org Initiation — Senior Testing Your Limits"] },
-          { group:"Career", items:["First Job Interview — The Critical HRD","Startup Pitch — 5 Minutes to Convince an Investor","Salary Negotiation — A Manager Who Won't Budge","Press Conference — An Aggressive Journalist","Client Meeting — The Decision Is Theirs"] },
+          { group:"Career", items:["First Job Interview — The Critical HRD","Startup Pitch — 5 Minutes to Convince an Investor","Salary Negotiation — A Manager Who Won't Budge","Press Conference — An Aggressive Journalist","Exclusive Interview — You're the Journalist","Client Meeting — The Decision Is Theirs"] },
           { group:"Legal & Public", items:["Mock Trial — A Prosecutor With No Mercy","Public Debate — An Opponent More Experienced Than You","Government Audience — Bureaucracy That Isn't On Your Side"] },
         ],
       },
