@@ -3055,7 +3055,7 @@ export default function Profess() {
           }}));
         }
       }
-      currentRoleRef.current = newRole;
+      if (newRole && newRole !== "default") currentRoleRef.current = newRole;
       setIsTransitioning(true);
       setTimeout(() => { setCurrentRole(newRole||prevRole); setCurrentMood(newMood||"neutral"); setIsInRole(newInRole); setIsTransitioning(false); }, 380);
     } else {
@@ -3069,11 +3069,15 @@ export default function Profess() {
           generated.name = charName || cached.name;
           setCharCache(prev => ({ ...prev, [prevRole]: generated }));
         } else {
-          setCharCache(prev => ({ ...prev, [prevRole]: {
-            ...(prev[prevRole]||{}),
-            ...(charName ? { name: charName } : {}),
-            ...(charTitle ? { title: charTitle } : {}),
-          }}));
+          const nameMatch = !charName || (cached && cached.name === charName);
+          const titleMatch = !charTitle || (cached && cached.title === charTitle);
+          if (!nameMatch || !titleMatch) {
+            setCharCache(prev => ({ ...prev, [prevRole]: {
+              ...(prev[prevRole]||{}),
+              ...(charName ? { name: charName } : {}),
+              ...(charTitle ? { title: charTitle } : {}),
+            }}));
+          }
         }
       }
     }
@@ -3386,11 +3390,13 @@ export default function Profess() {
   const resetSession = () => { stopSpeech(); turnQueueRef.current = []; currentRoleRef.current = "default"; recognitionRef.current?.stop(); setScreen("lang"); setLang(null); setSessionMode(null); setPendingMode(null); setIntensity(null); setScenario(null); setSummary(null); setLastExchange(null); setMessages([]); setInput(""); setError(null); setCurrentRole("default"); setCurrentMood("neutral"); setIsInRole(false); setIsTransitioning(false); setIsListening(false); setMicError(null); setCharCache({}); setShowMusicSuggest(false); hasOpenedMusic.current = false; setInCoachMode(false); };
 
   const displayRole = (isInRole || currentRole !== "default") ? currentRole : "default";
-  const charMeta = displayRole === "default"
-    ? { ...CHARS.default, title: lang === "id" ? "Coach Kamu" : "Your Coach" }
-    : (charCache[displayRole] || generateChar(displayRole));
-  if (displayRole !== "default" && !charMeta.title) charMeta.title = ROLE_TITLES[displayRole] || displayRole;
-  const charSVG = buildSVG(charMeta, agitated.session ? "uncomfortable" : currentMood, isTalking && isSpeaking);
+  const charMeta = useMemo(() => {
+    if (displayRole === "default") return { ...CHARS.default, title: lang === "id" ? "Coach Kamu" : "Your Coach" };
+    const meta = charCache[displayRole] || generateChar(displayRole);
+    if (!meta.title) return { ...meta, title: ROLE_TITLES[displayRole] || displayRole };
+    return meta;
+  }, [displayRole, charCache, lang]);
+  const charSVG = useMemo(() => buildSVG(charMeta, agitated.session ? "uncomfortable" : currentMood, isTalking && isSpeaking), [charMeta, agitated.session, currentMood, isTalking, isSpeaking]);
 
 
 
