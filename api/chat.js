@@ -62,6 +62,15 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: { message: "Too many requests, please slow down" } });
   }
 
+  const contentType = req.headers["content-type"] || "";
+  if (!contentType.includes("application/json")) {
+    return res.status(415).json({ error: { message: "Content-Type must be application/json" } });
+  }
+  const contentLength = parseInt(req.headers["content-length"] || "0", 10);
+  if (contentLength > 64_000) {
+    return res.status(413).json({ error: { message: "Request body too large" } });
+  }
+
   const apiKey = process.env.NVIDIA_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: { message: "NVIDIA_API_KEY not configured" } });
