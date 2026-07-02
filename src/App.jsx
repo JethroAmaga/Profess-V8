@@ -2432,9 +2432,16 @@ export default function Profess() {
   const extractRole = (t) => (t.match(/\[ROLE:\s*([^\]]+)\]/) || [])[1]?.trim().replace(/\s+/g,"_").toLowerCase() || null;
   const extractMood = (t) => (t.match(/\[MOOD:\s*(\w+)\]/) || [])[1] || null;
   const extractMode = (t) => (t.match(/\[MODE:\s*(\w+)\]/) || [])[1] || null;
-  // Block only question-words that are never valid names.
-  const CHAR_QUESTION_WORDS = /^(siapa|who)$/i;
-  const extractChar = (t) => { const m = t.match(/\[CHAR:\s*([^\]]+)\]/); if (!m) return null; const n = m[1].trim(); return CHAR_QUESTION_WORDS.test(n) ? null : n; };
+  // Block question-words and common function words that are never valid names.
+  const CHAR_QUESTION_WORDS = /^(siapa|who|dari|oleh|ke|pada|di|the|a|an|by|from|of|and|atau|dengan|untuk)$/i;
+  const extractChar = (t) => {
+    const m = t.match(/\[CHAR:\s*([^\]]+)\]/);
+    if (!m) return null;
+    // Strip leading preposition prefixes the model sometimes emits (e.g. "Dari Michelle" → "Michelle")
+    const n = m[1].trim().replace(/^(?:dari|oleh|from|by|ke|di)\s+/i, "").trim();
+    if (!n || CHAR_QUESTION_WORDS.test(n)) return null;
+    return n;
+  };
   const extractTitle = (t) => { const m = t.match(/\[TITLE:\s*([^\]]+)\]/); return m ? m[1].trim() : null; };
   const extractGender = (t) => { const m = t.match(/\[GENDER:\s*(f|m)\]/); return m ? m[1] : null; };
   // Strips identity tags plus any stray ((action)) or *asterisk* asides the
