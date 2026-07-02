@@ -16,10 +16,12 @@ const VALID_INTENSITIES = new Set(["comfortable", "challenging", "no_mercy"]);
 const MAX_MESSAGES = 50;
 const MAX_CONTENT_CHARS = 6000;
 
-const PRIMARY_MODEL  = "qwen/qwen3-next-80b-a3b-instruct";
-const FALLBACK_MODEL = "meta/llama-3.3-70b-instruct";
-const PRIMARY_TIMEOUT_MS  = 38000;
-const FALLBACK_TIMEOUT_MS = 15000;
+const PRIMARY_MODEL    = "qwen/qwen3-next-80b-a3b-instruct";
+const FALLBACK_MODEL   = "meta/llama-3.3-70b-instruct";
+const FALLBACK_MODEL_2 = "qwen/qwen3.5-397b-a17b";
+const PRIMARY_TIMEOUT_MS    = 38000;
+const FALLBACK_TIMEOUT_MS   = 15000;
+const FALLBACK_TIMEOUT_MS_2 = 15000;
 
 async function callNIM(apiKey, model, messages, timeoutMs) {
   const controller = new AbortController();
@@ -108,8 +110,19 @@ export default async function handler(req, res) {
         usedFallback = true;
       } catch (fallbackErr) {
         const fbTimeout = fallbackErr.name === "AbortError";
-        console.error(`Fallback model also failed: ${fbTimeout ? "timeout" : fallbackErr.message}`);
-        return res.status(504).json({ error: { message: "AI service unavailable" } });
+        const fbServerErr = [429, 500, 502, 503, 529].includes(fallbackErr.status);
+        console.error(`Fallback 1 failed: ${fbTimeout ? "timeout" : fallbackErr.message}, trying fallback 2`);
+        if (fbTimeout || fbServerErr) {
+          try {
+            text = await callNIM(apiKey, FALLBACK_MODEL_2, nimMessages, FALLBACK_TIMEOUT_MS_2);
+            usedFallback = true;
+          } catch (fallback2Err) {
+            console.error(`Fallback 2 also failed: ${fallback2Err.name === "AbortError" ? "timeout" : fallback2Err.message}`);
+            return res.status(504).json({ error: { message: "AI service unavailable" } });
+          }
+        } else {
+          return res.status(504).json({ error: { message: "AI service unavailable" } });
+        }
       }
     } else if (primaryErr.isNonJSON) {
       console.error(`Non-JSON response from NVIDIA NIM (status ${primaryErr.status})`);
