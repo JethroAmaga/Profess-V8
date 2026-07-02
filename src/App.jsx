@@ -4714,8 +4714,20 @@ export default function Profess() {
           )}
 
           {/* Footer */}
-          <div style={{ padding:"32px 40px", textAlign:"center" }}>
-            <p style={{ fontSize:"11px", color:"#1E1E1E", letterSpacing:".08em" }}>Profess — <SquigglyText style={{ color:"#1E1E1E" }}>Every conversation has another side.</SquigglyText></p>
+          <div style={{ padding:"48px 40px 40px", textAlign:"center", borderTop:"1px solid rgba(30,30,30,0.08)", marginTop:"16px" }}>
+            <p style={{ fontSize:"11px", color:"#1E1E1E", letterSpacing:".08em", marginBottom:"24px" }}>Profess — <SquigglyText style={{ color:"#1E1E1E" }}>Every conversation has another side.</SquigglyText></p>
+            <div style={{ maxWidth:"560px", margin:"0 auto", textAlign:"left" }}>
+              <p style={{ fontSize:"10px", color:"#6B6B6B", letterSpacing:".1em", textTransform:"uppercase", marginBottom:"10px" }}>Privacy</p>
+              <p style={{ fontSize:"11px", color:"#888", lineHeight:"1.7", marginBottom:"8px" }}>
+                Profess does not create accounts or collect personal information. A random session ID is stored in your browser (localStorage) solely to manage rate limits — it contains no identifying data and is never linked to you personally.
+              </p>
+              <p style={{ fontSize:"11px", color:"#888", lineHeight:"1.7", marginBottom:"8px" }}>
+                Messages you type are sent to our server and forwarded to a third-party AI model provider to generate responses. Do not include sensitive personal information in your practice conversations.
+              </p>
+              <p style={{ fontSize:"11px", color:"#888", lineHeight:"1.7" }}>
+                We do not use tracking cookies, analytics SDKs, or advertising networks. The music player uses YouTube's privacy-enhanced embed (<span style={{ fontFamily:"monospace", fontSize:"10px" }}>youtube-nocookie.com</span>), which does not set cookies unless you interact with it.
+              </p>
+            </div>
           </div>
         </div>
         </ScrollRevealSection>
